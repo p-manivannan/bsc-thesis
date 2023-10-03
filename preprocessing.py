@@ -117,4 +117,3 @@ def load(filename):
 
 inputs, targets = create_inputs_targets(epoch_data(preprocess_data(load_dataset())))
 save('all_subject_runs', inputs, targets)
-
