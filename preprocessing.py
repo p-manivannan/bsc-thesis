@@ -1,12 +1,12 @@
 from braindecode.datasets.moabb import MOABBDataset
-import mne
-import h5py
 import numpy as np
 import pandas as pd
 from braindecode.preprocessing import create_windows_from_events
 from braindecode.preprocessing import (
     exponential_moving_standardize, preprocess, Preprocessor)
 from numpy import multiply
+from saver_loader import *
+from sklearn.preprocessing import OneHotEncoder
 
 def load_dataset():
     dataset = MOABBDataset(dataset_name="BNCI2014001", subject_ids=None)
@@ -24,16 +24,13 @@ def preprocess_data(dataset):
     init_block_size = 1000
     # Factor to convert from V to uV
     factor = 1e6
+    iir_params = dict(order=3, ftype='butter', output='sos')
 
     preprocessors = [
         Preprocessor('pick_types', eeg=True, meg=False, stim=False),  # Keep EEG sensors
         Preprocessor(lambda data: multiply(data, factor)),  # Convert from V to uV
-        Preprocessor('filter', l_freq=low_cut_hz, h_freq=high_cut_hz, iir_params=None, method='iir'),  # Fourth order butterworth filter
-        # I think this preprocessor function calls an mne filter object. and in the docs
-        # it said iir_params=None and method='iir' means fourth order butterworth will be
-        # applied.
-        # Apparently when method='iir', the filter is applied twice, once forward and once backwards
-        # making it noncausal
+        Preprocessor('filter', l_freq=low_cut_hz, h_freq=high_cut_hz, iir_params=iir_params, method='iir', phase='forward'),  # Third order butterworth filter
+        # The logs say it's a causal filter but the order is 6?
         Preprocessor(exponential_moving_standardize,  # Exponential moving standardization
                     factor_new=factor_new, init_block_size=init_block_size)
     ]
@@ -55,7 +52,7 @@ def create_dataset(dataset):
       # an int. I have no idea what the third element is.
       # Some kind of array of three elements. First element is
       # always 0...
-      for idx, trial in enumerate(run):
+      for trial in run:
         lst.append(trial)
 
   # Get all runs in a single df.
@@ -86,6 +83,13 @@ def epoch_data(dataset):
 
     return windows_dataset
 
+def onehot(targets):
+    encoder = OneHotEncoder(sparse=False)
+    targets = targets.reshape(-1,1)
+    targets = encoder.fit_transform(targets)
+    return targets
+
+
 def create_inputs_targets(windows_dataset):
     split_data = windows_dataset.split('subject')
     num_subjects = 9
@@ -100,20 +104,6 @@ def create_inputs_targets(windows_dataset):
     return inputs, targets
 
 
-def save(filename, inputs, targets):
-  file = h5py.File(filename + '.h5', 'w')
-  file.create_dataset('inputs', data=inputs)
-  file.create_dataset('targets', data=targets)
-  file.close()
-
-
-# Load only first 2 subjects for testing purposes
-def load(filename):
-  file = h5py.File(filename+'.h5', 'r')
-  inputs = file['inputs'][0:1152]
-  targets = file['targets'][:1152]
-  file.close()
-  return inputs, targets
-
 inputs, targets = create_inputs_targets(epoch_data(preprocess_data(load_dataset())))
-save('all_subject_runs', inputs, targets)
+targets = onehot(targets)
+save_data('all_subject_runs', inputs, targets)
