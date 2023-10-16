@@ -95,7 +95,7 @@ def build_dropconnect_model(hp):
                     optimizer=optimizer, metrics=["accuracy"])
       return model
 
-def tune_model(x_train, x_val, y_train, y_val, method):
+def tune_model(x_train, x_val, y_train, y_val, method, callbacks):
     methods = {'mcdropout': build_dropout_model, 'mcdropconnect': build_dropconnect_model}
     tuner = kt.GridSearch(hypermodel=methods[method],
                           objective='val_loss',
@@ -103,7 +103,8 @@ def tune_model(x_train, x_val, y_train, y_val, method):
                           executions_per_trial=1,
                           overwrite=True,
                           directory=f'{method}/tuning')
-    tuner.search(x_train, y_train, epochs=100, validation_data=(x_val, y_val))
+    tuner.search(x_train, y_train, epochs=100, validation_data=(x_val, y_val),
+                 callbacks=callbacks)
     return tuner
 
     
