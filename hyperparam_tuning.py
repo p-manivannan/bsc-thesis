@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-from models import *
+from models_bachelors import *
 from file_functions import *
 
 '''
