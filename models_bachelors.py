@@ -109,4 +109,5 @@ def tune_model(x_train, x_val, y_train, y_val, method, callbacks):
 
     
     
+print('bogos binted')
     

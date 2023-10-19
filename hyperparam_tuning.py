@@ -13,11 +13,11 @@ dataset = load('all_subject_runs')
 loaded_inputs = dataset['inputs']
 loaded_targets = dataset['targets']
 
-n_epochs= 100
+n_epochs= 75
 fit_params = {"epochs: ", n_epochs}
-early_stopping = EarlyStopping(monitor='val_loss', patience=3)
+early_stopping = [EarlyStopping(monitor='val_loss', patience=5)]
 # There's an error in MCDropConnect so it's out of the list for now
-methods = ['mcdropconnect']
+methods = ['mcdropout']
 subject_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 drop_rates = dict.fromkeys(methods, 0)
 
@@ -33,15 +33,15 @@ for method in methods:
     train_targets = np.vstack(loaded_targets[train_ids])        
     X_train, X_val, Y_train, Y_val = train_test_split(train_inputs, train_targets, test_size=0.1)
     # Do hyperparam tuning (SUBJECT 0)
-    drop_rates = tune_model(X_train, X_val, Y_train, Y_val, method)
+    drop_rates = tune_model(X_train, X_val, Y_train, Y_val, method, early_stopping)
 
-mcdropout_tuner = kt.GridSearch(build_model_dropout,
+mcdropout_tuner = kt.GridSearch(build_dropout_model,
                     objective='val_loss',
                     max_trials=100,
                     directory=f'mcdropout/hyperparams',
                     project_name='Bsc-thesis')
 
-mcdropconnect_tuner = kt.GridSearch(build_model_connect,
+mcdropconnect_tuner = kt.GridSearch(build_dropconnect_model,
                     objective='val_loss',
                     max_trials=100,
                     directory=f'mcdropconnect/hyperparams',
