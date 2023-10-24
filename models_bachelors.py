@@ -1,8 +1,10 @@
 from tensorflow import keras
 import keras_tuner as kt
+import numpy as np
+import math
 import keras.backend as K
 from keras.constraints import max_norm
-from keras_uncertainty.layers import DropConnectDense, DropConnectConv2D, StochasticDropout
+from keras_uncertainty.layers import DropConnectDense, StochasticDropout
 from keras_uncertainty.utils import numpy_entropy
 
 # need these for ShallowConvNet
@@ -12,11 +14,19 @@ def square(x):
 def log(x):
     return K.log(K.clip(x, min_value = 1e-7, max_value = 10000))   
 
-def uncertainty(probs):
+def shanon_entropy(probs):
   return numpy_entropy(probs, axis=-1)
 
-def uncertainty(probs):
-  return numpy_entropy(probs, axis=-1)
+def predictive_entropy(samples):
+  return -np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=samples).sum(axis=-1)
+
+def normalize_entropy(entropy, n_classes=4):
+  return entropy / np.log2(n_classes)
+
+def predictive_uncertainty(samples):
+    entropy = predictive_entropy(samples)
+    norm = normalize_entropy(entropy)
+    return norm
 
 
 def build_dropout_model(hp):
