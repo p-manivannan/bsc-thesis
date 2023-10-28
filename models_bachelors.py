@@ -43,7 +43,11 @@ def build_dropout_model(hp):
       s_p = (1, 15)   # Sp is pool stride
 
       Nc = 4          # Number of classes
-      drop_rates = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+      drop_rates_1 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
+      drop_rates_2 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
+      conv_drop = hp.Boolean('conv_drop')
+      # Another dropout layer before FC layer
+      fc_drop = hp.Boolean('fc_drop')
 
       model = keras.models.Sequential()
       model.add(keras.layers.Conv2D(f_1,  k_1, padding = 'SAME',
@@ -54,11 +58,14 @@ def build_dropout_model(hp):
                                   input_shape = (1, C, T),
                                   activation="linear",
                                   kernel_constraint = max_norm(2)))
+      if conv_drop:
+        model.add(StochasticDropout(drop_rates_1))
       model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=0.00001))
       model.add(keras.layers.Activation(square))
       model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
       model.add(keras.layers.Activation(log))
-      model.add(StochasticDropout(drop_rates))
+      if fc_drop:
+        model.add(StochasticDropout(drop_rates_2))
       model.add(keras.layers.Flatten())
       model.add(keras.layers.Dense(Nc, activation='softmax', kernel_constraint = max_norm(0.5)))
 
@@ -81,7 +88,12 @@ def build_dropconnect_model(hp):
       s_p = (1, 15)   # Sp is pool stride
 
       Nc = 4          # Number of classes
-      drop_rates = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+      drop_rates_1 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
+      drop_rates_2 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
+      # One dropout layer after 2nd conv layer (the one with most params)
+      conv_drop = hp.Boolean('conv_drop')
+      # Another dropout layer before FC layer
+      fc_drop = hp.Boolean('fc_drop')
 
       model = keras.models.Sequential()
       model.add(keras.layers.Conv2D(f_1,  k_1, padding = 'SAME',
@@ -92,11 +104,14 @@ def build_dropconnect_model(hp):
                                   input_shape = (1, C, T),
                                   activation="linear",
                                   kernel_constraint = max_norm(2)))
+      if conv_drop:
+        model.add(DropConnectDense(22, drop_rates_1))
       model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=0.00001))
       model.add(keras.layers.Activation(square))
       model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
       model.add(keras.layers.Activation(log))
-      model.add(DropConnectDense(22, drop_rates))
+      if fc_drop:
+        model.add(DropConnectDense(22, drop_rates_2))
       model.add(keras.layers.Flatten())
       model.add(keras.layers.Dense(Nc, activation='softmax', kernel_constraint = max_norm(0.5)))
 
@@ -111,13 +126,14 @@ def tune_model(x_train, x_val, y_train, y_val, method, callbacks):
                           objective='val_loss',
                           max_trials=100,
                           executions_per_trial=1,
-                          overwrite=True,
-                          directory=f'{method}/tuning')
+                          overwrite=False,
+                          directory=f'{method}/tuning',
+                          project_name='f{method}')
     tuner.search(x_train, y_train, epochs=100, validation_data=(x_val, y_val),
                  callbacks=callbacks)
     return tuner
 
-    
+# UNMODIFIED FOR HYPERPARAM TUNING OF CONV DROP LAYERS
 def create_model(drop_rates, method):
     C = 22          # Number of electrodes
     T = 1125        # Time samples of network input

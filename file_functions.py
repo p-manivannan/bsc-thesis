@@ -127,3 +127,26 @@ def get_x_y(inputs, targets):
     X = np.vstack(inputs).reshape(n_runs, channels, timestamps)
     Y = np.vstack(targets).reshape(n_runs, n_classes)
     return X, Y
+
+
+def remove_lockbox(loaded_inputs, loaded_targets, lockbox):
+    inputs = loaded_inputs.copy()
+    targets = loaded_targets.copy()
+    per_sbj_lockbox_inputs = []
+    per_sbj_lockbox_targets = []
+    for i in range(lockbox.shape[0]):
+        subj_inputs = inputs[i, lockbox[i,:], :, :]   
+        subj_targets = targets[i, lockbox[i,:], :]
+        per_sbj_lockbox_inputs.append(subj_inputs)
+        per_sbj_lockbox_targets.append(subj_targets)
+
+    per_subj_keep_inputs = []
+    per_subj_keep_targets = []
+    for i in range(lockbox.shape[0]):
+        subj_keep_inputs = np.delete(inputs[i, :, :, :], obj=lockbox[i, :], axis=0)
+        subj_keep_targets = np.delete(targets[i, :, :], obj=lockbox[i, :], axis=0)
+        per_subj_keep_inputs.append(subj_keep)
+        per_subj_keep_targets.append(subj_keep_targets)
+
+    return np.vstack(per_subj_keep_inputs), np.vstack(per_subj_keep_targets)
+    
