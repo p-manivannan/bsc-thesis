@@ -176,3 +176,31 @@ def create_model(drop_rates, method):
                   optimizer=optimizer, metrics=["accuracy"])
     return model
 
+'''
+Returns the best tuned models. 
+For MCDropout this is:
+{'drop_rates': 0.4, 'conv_drop': False, 'fc_drop': True}
+For MCDropConnect this is:
+{'drop_rates': 0.2, 'conv_drop': True, 'fc_drop': False}
+Top models for MCDropConnect all do not have UQ layers.
+So the model description above corresponds to first
+trial that had a UQ layer with val loss 0.822
+'''
+def load_tuned_models():
+  mcdropout_tuner = kt.GridSearch(build_dropout_model,
+                      objective='val_loss',
+                      max_trials=100,
+                      directory=f'mcdropout/tuning',
+                      project_name='f{method}')
+
+  mcdropconnect_tuner = kt.GridSearch(build_dropconnect_model,
+                      objective='val_loss',
+                      max_trials=100,
+                      directory=f'mcdropconnect/tuning',
+                      project_name='f{method}')
+
+  mcdropout_tuner.reload()
+  mcdropconnect_tuner.reload()
+  dropout_best_hps = mcdropout_tuner.get_best_hyperparameters(num_trials=1)[0]
+  dropconnect_best_hps = mcdropconnect_tuner.get_best_hyperparameters(num_trials=10)[6]
+  return dropout_best_hps, dropconnect_best_hps

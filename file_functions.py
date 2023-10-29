@@ -145,7 +145,7 @@ def remove_lockbox(loaded_inputs, loaded_targets, lockbox):
     for i in range(lockbox.shape[0]):
         subj_keep_inputs = np.delete(inputs[i, :, :, :], obj=lockbox[i, :], axis=0)
         subj_keep_targets = np.delete(targets[i, :, :], obj=lockbox[i, :], axis=0)
-        per_subj_keep_inputs.append(subj_keep)
+        per_subj_keep_inputs.append(subj_keep_inputs)
         per_subj_keep_targets.append(subj_keep_targets)
 
     return np.vstack(per_subj_keep_inputs), np.vstack(per_subj_keep_targets)
