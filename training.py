@@ -3,7 +3,6 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-from livelossplot import PlotLossesKeras
 from models_bachelors import *
 from file_functions import *
 import tensorflow as tf
@@ -50,5 +49,5 @@ for method in methods:
         
         model = build_dropout_model(dropout_best_hps) if method == 'mcdropout' else build_dropconnect_model(dropconnect_best_hps)
         history = model.fit(X_train, Y_train, epochs=n_epochs, validation_data=[X_val, Y_val],
-                           callbacks=[early_stopping, saving_callback, PlotLossesKeras()])
+                           callbacks=[early_stopping, saving_callback])
                 
