@@ -106,7 +106,7 @@ def recursively_load_dict_contents_from_group( h5file, path):
     ans = {}
     for key, item in h5file[path].items():
         if isinstance(item, h5py._hl.dataset.Dataset):
-            ans[key] = item.value
+            ans[key] = item[()]
         elif isinstance(item, h5py._hl.group.Group):
             ans[key] = recursively_load_dict_contents_from_group(h5file, path + key + '/')
     return ans            
@@ -128,21 +128,39 @@ def get_x_y(inputs, targets):
     Y = np.vstack(targets).reshape(n_runs, n_classes)
     return X, Y
 
+'''
+Gets trials from lockbox indices (8, 57)
+'''
+def get_lockbox_data(loaded_inputs, loaded_targets, lockbox):
+    inputs = loaded_inputs.copy()       # Shape: (9, 576, 22, 1125)
+    targets = loaded_targets.copy()     # Shape: (9, 576, 4)
+    per_sbj_lockbox_inputs = []
+    per_sbj_lockbox_targets = []
+    # Iterate through train set subject ids
+    for i in range(lockbox.shape[0]):
+        subj_inputs = inputs[i, lockbox[i,:], :, :]   
+        subj_targets = targets[i, lockbox[i,:], :]
+        per_sbj_lockbox_inputs.append(subj_inputs)
+        per_sbj_lockbox_targets.append(subj_targets)
+    
+    return np.vstack(per_sbj_lockbox_inputs), np.vstack(per_sbj_lockbox_targets)
+
+
 
 def remove_lockbox(loaded_inputs, loaded_targets, lockbox):
     inputs = loaded_inputs.copy()
     targets = loaded_targets.copy()
     per_sbj_lockbox_inputs = []
     per_sbj_lockbox_targets = []
-    for i in range(lockbox.shape[0]):
-        subj_inputs = inputs[i, lockbox[i,:], :, :]   
+    for i in range(lockbox.shape[0]):   # Iterate through each test subject and get lockboxed trials
+        subj_inputs = inputs[i, lockbox[i,:], :, :]
         subj_targets = targets[i, lockbox[i,:], :]
         per_sbj_lockbox_inputs.append(subj_inputs)
         per_sbj_lockbox_targets.append(subj_targets)
 
     per_subj_keep_inputs = []
     per_subj_keep_targets = []
-    for i in range(lockbox.shape[0]):
+    for i in range(lockbox.shape[0]):   # Iterate through each test subject and delete lockboxed trials
         subj_keep_inputs = np.delete(inputs[i, :, :, :], obj=lockbox[i, :], axis=0)
         subj_keep_targets = np.delete(targets[i, :, :], obj=lockbox[i, :], axis=0)
         per_subj_keep_inputs.append(subj_keep_inputs)

@@ -20,6 +20,9 @@ def shanon_entropy(probs):
 def predictive_entropy(samples):
   return -np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=samples).sum(axis=-1)
 
+def mutual_information(samples):
+  return predictive_entropy(samples) - shannon_entropy(samples)
+
 def normalize_entropy(entropy, n_classes=4):
   return entropy / np.log2(n_classes)
 
@@ -43,8 +46,8 @@ def build_dropout_model(hp):
       s_p = (1, 15)   # Sp is pool stride
 
       Nc = 4          # Number of classes
-      drop_rates_1 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
-      drop_rates_2 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
+      drop_rates_1 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
+      drop_rates_2 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
       conv_drop = hp.Boolean('conv_drop')
       # Another dropout layer before FC layer
       fc_drop = hp.Boolean('fc_drop')
@@ -88,8 +91,8 @@ def build_dropconnect_model(hp):
       s_p = (1, 15)   # Sp is pool stride
 
       Nc = 4          # Number of classes
-      drop_rates_1 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
-      drop_rates_2 = hp.Choice('drop_rates', [0.0, 0.1, 0.2, 0.3, 0.4])
+      drop_rates_1 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
+      drop_rates_2 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
       # One dropout layer after 2nd conv layer (the one with most params)
       conv_drop = hp.Boolean('conv_drop')
       # Another dropout layer before FC layer
@@ -121,20 +124,20 @@ def build_dropconnect_model(hp):
       return model
 
 def tune_model(x_train, x_val, y_train, y_val, method, callbacks):
-    methods = {'mcdropout': build_dropout_model, 'mcdropconnect': build_dropconnect_model}
+    # methods = {'mcdropout': build_dropout_model, 'mcdropconnect': build_dropconnect_model}
+    methods = {'mcdropconnect': build_dropconnect_model}
     tuner = kt.GridSearch(hypermodel=methods[method],
                           objective='val_loss',
                           max_trials=100,
                           executions_per_trial=1,
-                          overwrite=False,
+                          overwrite=True,
                           directory=f'{method}/tuning',
-                          project_name='f{method}')
+                          project_name=f'{method}')
     tuner.search(x_train, y_train, epochs=100, validation_data=(x_val, y_val),
                  callbacks=callbacks)
     return tuner
 
-# UNMODIFIED FOR HYPERPARAM TUNING OF CONV DROP LAYERS
-def create_model(drop_rates, method):
+def build_standard_model(hp):
     C = 22          # Number of electrodes
     T = 1125        # Time samples of network input
 
@@ -149,6 +152,13 @@ def create_model(drop_rates, method):
 
     Nc = 4          # Number of classes
 
+    drop_rates_1 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
+    drop_rates_2 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
+    # One dropout layer after 2nd conv layer (the one with most params)
+    conv_drop = hp.Boolean('conv_drop')
+    # Another dropout layer before FC layer
+    fc_drop = hp.Boolean('fc_drop')
+
     model = keras.models.Sequential()
     model.add(keras.layers.Conv2D(f_1,  k_1, padding = 'SAME',
                                 activation="linear",
@@ -158,16 +168,14 @@ def create_model(drop_rates, method):
                                 input_shape = (1, C, T),
                                 activation="linear",
                                 kernel_constraint = max_norm(2)))
+    if conv_drop:
+      model.add(keras.layers.Dropout(drop_rates_1))
     model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=0.00001))
     model.add(keras.layers.Activation(square))
     model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
     model.add(keras.layers.Activation(log))
-    if method == 'mcdropconnect':
-        model.add(DropConnectDense(22, drop_rates))
-    elif method == 'mcdropout':
-        model.add(StochasticDropout(drop_rates))
-    else:
-        model.add(keras.layers.Dropout(drop_rates))
+    if fc_drop:
+      model.add(keras.layers.Dropout(drop_rates_2))
     model.add(keras.layers.Flatten())
     model.add(keras.layers.Dense(Nc, activation='softmax', kernel_constraint = max_norm(0.5)))
 
@@ -197,10 +205,10 @@ def load_tuned_models():
                       objective='val_loss',
                       max_trials=100,
                       directory=f'mcdropconnect/tuning',
-                      project_name='f{method}')
+                      project_name=f'mcdropconnect')
 
   mcdropout_tuner.reload()
   mcdropconnect_tuner.reload()
-  dropout_best_hps = mcdropout_tuner.get_best_hyperparameters(num_trials=1)[0]
-  dropconnect_best_hps = mcdropconnect_tuner.get_best_hyperparameters(num_trials=10)[6]
+  dropout_best_hps = mcdropout_tuner.get_best_hyperparameters(num_trials=10)[1] # Top trial with any UQ layer
+  dropconnect_best_hps = mcdropconnect_tuner.get_best_hyperparameters(num_trials=10)[5] # Top trial with any UQ layer
   return dropout_best_hps, dropconnect_best_hps
