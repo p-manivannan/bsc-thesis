@@ -33,14 +33,19 @@ def predictive_uncertainty(samples):
 
 
 def build_dropout_model(hp):
+
+  # KERNEL SIZE IS HOW LONG SEGMENT IS THAT YOU'RE LOOKING AT. 
+  # NUMBER OF FILTERS IS HOW MANY OF THESE SEGMENTS YOU'RE LEARNING IT IS ARBITRARY
       C = 22          # Number of electrodes
       T = 1125        # Time samples of network input
 
-      k_1 = 40        # K is number of convolutional kernels. SUBJECT TO HYPERPARAM TUNING
-      f_1 = 25        # F is kernel size SUBJECT TO HYPERPARAM TUNING
+      f_1 = 40              # F is number of convolutional kernels.
+      k_1 = (1, 25)         # K is kernel size 
 
-      k_2 = 40
-      f_2 = C
+      # One thats size of channels and another that's size of timestamps
+
+      f_2 = 40
+      k_2 = (C, 1)
 
       f_p = (1, 75)   # Fp is pooling size
       s_p = (1, 15)   # Sp is pool stride
@@ -51,19 +56,19 @@ def build_dropout_model(hp):
       conv_drop = hp.Boolean('conv_drop')
       # Another dropout layer before FC layer
       fc_drop = hp.Boolean('fc_drop')
-
+      # I APPARENTLY SWITCH AROUND THE ORDER OF F1 AND K1
+      # ADD THE AXIS PARAM FOR MAX NORM
       model = keras.models.Sequential()
-      model.add(keras.layers.Conv2D(f_1,  k_1, padding = 'SAME',
+      model.add(keras.layers.Conv2D(filters=f_1,  kernel_size=k_1, padding = 'SAME',
                                   activation="linear",
                                   input_shape = (C, T, 1),
-                                  kernel_constraint = max_norm(2)))
-      model.add(keras.layers.Conv2D(f_2,  k_2, padding = 'SAME',
-                                  input_shape = (1, C, T),
+                                  kernel_constraint = max_norm(2, axis=(0, 1, 2))))
+      model.add(keras.layers.Conv2D(filters=f_2,  kernel_size=k_2, padding = 'SAME',
                                   activation="linear",
-                                  kernel_constraint = max_norm(2)))
+                                  kernel_constraint = max_norm(2, axis=(0, 1, 2))))
       if conv_drop:
         model.add(StochasticDropout(drop_rates_1))
-      model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=0.00001))
+      model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=1e-05))
       model.add(keras.layers.Activation(square))
       model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
       model.add(keras.layers.Activation(log))
@@ -78,14 +83,18 @@ def build_dropout_model(hp):
       return model
 
 def build_dropconnect_model(hp):
+  # KERNEL SIZE IS HOW LONG SEGMENT IS THAT YOU'RE LOOKING AT. 
+  # NUMBER OF FILTERS IS HOW MANY OF THESE SEGMENTS YOU'RE LEARNING IT IS ARBITRARY
       C = 22          # Number of electrodes
       T = 1125        # Time samples of network input
 
-      k_1 = 40        # K is number of convolutional kernels. SUBJECT TO HYPERPARAM TUNING
-      f_1 = 25        # F is kernel size SUBJECT TO HYPERPARAM TUNING
+      f_1 = 40        # K is number of convolutional kernels.
+      k_1 = (1, 25)        # F is kernel size 
 
-      k_2 = 40
-      f_2 = C
+      # One thats size of channels and another that's size of timestamps
+
+      f_2 = 40    # ITS SUPPOSED TO BE OTHER WAY AROUND. FILTER SIZE IS 
+      k_2 = (C, 1)     # KERNEL SIZE SHOULD ACTUALLY BE C 
 
       f_p = (1, 75)   # Fp is pooling size
       s_p = (1, 15)   # Sp is pool stride
@@ -93,23 +102,22 @@ def build_dropconnect_model(hp):
       Nc = 4          # Number of classes
       drop_rates_1 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
       drop_rates_2 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
-      # One dropout layer after 2nd conv layer (the one with most params)
       conv_drop = hp.Boolean('conv_drop')
       # Another dropout layer before FC layer
       fc_drop = hp.Boolean('fc_drop')
-
+      # I APPARENTLY SWITCH AROUND THE ORDER OF F1 AND K1
+      # ADD THE AXIS PARAM FOR MAX NORM
       model = keras.models.Sequential()
-      model.add(keras.layers.Conv2D(f_1,  k_1, padding = 'SAME',
+      model.add(keras.layers.Conv2D(filters=f_1,  kernel_size=k_1, padding = 'SAME',
                                   activation="linear",
                                   input_shape = (C, T, 1),
-                                  kernel_constraint = max_norm(2)))
-      model.add(keras.layers.Conv2D(f_2,  k_2, padding = 'SAME',
-                                  input_shape = (1, C, T),
+                                  kernel_constraint = max_norm(2, axis=(0, 1, 2))))
+      model.add(keras.layers.Conv2D(filters=f_2,  kernel_size=k_2, padding = 'SAME',
                                   activation="linear",
-                                  kernel_constraint = max_norm(2)))
+                                  kernel_constraint = max_norm(2, axis=(0, 1, 2))))
       if conv_drop:
         model.add(DropConnectDense(22, drop_rates_1))
-      model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=0.00001))
+      model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=1e-05))
       model.add(keras.layers.Activation(square))
       model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
       model.add(keras.layers.Activation(log))
@@ -124,8 +132,7 @@ def build_dropconnect_model(hp):
       return model
 
 def tune_model(x_train, x_val, y_train, y_val, method, callbacks):
-    # methods = {'mcdropout': build_dropout_model, 'mcdropconnect': build_dropconnect_model}
-    methods = {'mcdropconnect': build_dropconnect_model}
+    methods = {'mcdropout': build_dropout_model, 'mcdropconnect': build_dropconnect_model}
     tuner = kt.GridSearch(hypermodel=methods[method],
                           objective='val_loss',
                           max_trials=100,
@@ -138,39 +145,41 @@ def tune_model(x_train, x_val, y_train, y_val, method, callbacks):
     return tuner
 
 def build_standard_model(hp):
+# KERNEL SIZE IS HOW LONG SEGMENT IS THAT YOU'RE LOOKING AT. 
+# NUMBER OF FILTERS IS HOW MANY OF THESE SEGMENTS YOU'RE LEARNING IT IS ARBITRARY
     C = 22          # Number of electrodes
     T = 1125        # Time samples of network input
 
-    k_1 = 40        # K is number of convolutional kernels. SUBJECT TO HYPERPARAM TUNING
-    f_1 = 25        # F is kernel size SUBJECT TO HYPERPARAM TUNING
+    f_1 = 40        # K is number of convolutional kernels.
+    k_1 = (1, 25)        # F is kernel size 
 
-    k_2 = 40
-    f_2 = C
+    # One thats size of channels and another that's size of timestamps
+
+    f_2 = 40    # ITS SUPPOSED TO BE OTHER WAY AROUND. FILTER SIZE IS 
+    k_2 = (C, 1)     # KERNEL SIZE SHOULD ACTUALLY BE C 
 
     f_p = (1, 75)   # Fp is pooling size
     s_p = (1, 15)   # Sp is pool stride
 
     Nc = 4          # Number of classes
-
     drop_rates_1 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
     drop_rates_2 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
-    # One dropout layer after 2nd conv layer (the one with most params)
     conv_drop = hp.Boolean('conv_drop')
     # Another dropout layer before FC layer
     fc_drop = hp.Boolean('fc_drop')
-
+    # I APPARENTLY SWITCH AROUND THE ORDER OF F1 AND K1
+    # ADD THE AXIS PARAM FOR MAX NORM
     model = keras.models.Sequential()
-    model.add(keras.layers.Conv2D(f_1,  k_1, padding = 'SAME',
+    model.add(keras.layers.Conv2D(filters=f_1,  kernel_size=k_1, padding = 'SAME',
                                 activation="linear",
                                 input_shape = (C, T, 1),
-                                kernel_constraint = max_norm(2)))
-    model.add(keras.layers.Conv2D(f_2,  k_2, padding = 'SAME',
-                                input_shape = (1, C, T),
+                                kernel_constraint = max_norm(2, axis=(0, 1, 2))))
+    model.add(keras.layers.Conv2D(filters=f_2,  kernel_size=k_2, padding = 'SAME',
                                 activation="linear",
-                                kernel_constraint = max_norm(2)))
+                                kernel_constraint = max_norm(2, axis=(0, 1, 2))))
     if conv_drop:
       model.add(keras.layers.Dropout(drop_rates_1))
-    model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=0.00001))
+    model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=1e-05))
     model.add(keras.layers.Activation(square))
     model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
     model.add(keras.layers.Activation(log))
@@ -199,13 +208,13 @@ def load_tuned_models():
                       objective='val_loss',
                       max_trials=100,
                       directory=f'mcdropout/tuning',
-                      project_name='f{method}')
+                      project_name=f'results')
 
   mcdropconnect_tuner = kt.GridSearch(build_dropconnect_model,
                       objective='val_loss',
                       max_trials=100,
                       directory=f'mcdropconnect/tuning',
-                      project_name=f'mcdropconnect')
+                      project_name=f'results')
 
   mcdropout_tuner.reload()
   mcdropconnect_tuner.reload()

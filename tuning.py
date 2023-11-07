@@ -9,13 +9,10 @@ import keras_tuner as kt
 Old mistake: I was training on test set and removing lockbox from test set.
 '''
 
-def call_tuning_file(dataset, lockbox, loaded_inputs, loaded_targets):
+def call_tuning_file(dataset, lockbox, loaded_inputs, loaded_targets, methods):
     n_epochs= 100
-    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10)
     callbacks = [early_stopping]
-    # There was an error with mcdropconnect. So while mcdropout finished, mcdropconnect
-    # was computed separately.
-    methods = ['mcdropconnect']
 
     subject_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     test_subject_id = 0

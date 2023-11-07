@@ -48,7 +48,6 @@ def recursive_dict2hdf5(h5file, path, dic):
             raise ValueError('Cannot save %s type' % type(item))
         
 def save_dict_to_hdf5(dic, filename):
-
     with h5py.File(filename, 'w') as h5file:
         recursively_save_dict_contents_to_group(h5file, '/', dic)
 
@@ -79,7 +78,7 @@ def recursively_save_dict_contents_to_group( h5file, path, dic):
         if not isinstance(key, str):
             raise ValueError("dict keys must be strings to save to hdf5")
         # save strings, numpy.int64, and numpy.float64 types
-        if isinstance(item, (np.int64, np.float64, str, np.float, float, np.float32,int)):
+        if isinstance(item, (np.int64, np.float64, str, float, np.float32,int)):
             #print( 'here' )
             h5file[path + key] = item
             if not h5file[path + key].value == item:
