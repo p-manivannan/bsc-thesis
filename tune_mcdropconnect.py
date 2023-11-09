@@ -6,6 +6,10 @@ from tuning import *
 from training import *
 from file_functions import *
 
+import tensorflow as tf
+devices = tf.config.list_physical_devices()
+print(devices)
+
 '''
 Load data
 '''
@@ -14,7 +18,6 @@ lockbox = load('lockbox')['data']
 loaded_inputs = dataset['inputs']
 loaded_targets = dataset['targets']
 
-call_tuning_file(dataset, lockbox, loaded_inputs, loaded_targets, ['mcdropconnect'])
-
-# call_training_file(dataset, lockbox, loaded_inputs, loaded_targets)
+# call_tuning_file(dataset, lockbox, loaded_inputs, loaded_targets, ['mcdropconnect'])
+call_training_file(dataset, lockbox, loaded_inputs, loaded_targets)
 

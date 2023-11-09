@@ -12,8 +12,8 @@ def call_training_file(dataset, lockbox, loaded_inputs, loaded_targets):
     dropout_best_hps, dropconnect_best_hps = load_tuned_models()
 
     n_epochs= 100
-    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
-    methods = ['mcdropout', 'mcdropconnect']
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10)
+    methods = ['mcdropconnect', 'mcdropout']
     subject_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
     '''

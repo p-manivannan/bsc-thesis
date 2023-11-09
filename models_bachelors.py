@@ -208,16 +208,19 @@ def load_tuned_models():
                       objective='val_loss',
                       max_trials=100,
                       directory=f'mcdropout/tuning',
-                      project_name=f'results')
+                      project_name=f'mcdropout')
 
   mcdropconnect_tuner = kt.GridSearch(build_dropconnect_model,
                       objective='val_loss',
                       max_trials=100,
                       directory=f'mcdropconnect/tuning',
-                      project_name=f'results')
+                      project_name=f'mcdropconnect')
 
   mcdropout_tuner.reload()
   mcdropconnect_tuner.reload()
-  dropout_best_hps = mcdropout_tuner.get_best_hyperparameters(num_trials=10)[1] # Top trial with any UQ layer
+  # Dropout best params were index 0: 0.2 with only fc_drop
+  # Dropconnect best params were index 5: 0.1 with only conv_drop
+  # mcdropconnect_tuner.results_summary()
+  dropout_best_hps = mcdropout_tuner.get_best_hyperparameters(num_trials=10)[0] # Top trial with any UQ layer
   dropconnect_best_hps = mcdropconnect_tuner.get_best_hyperparameters(num_trials=10)[5] # Top trial with any UQ layer
   return dropout_best_hps, dropconnect_best_hps
