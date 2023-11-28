@@ -1,5 +1,5 @@
 import sys, os, gc
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
@@ -19,8 +19,6 @@ Both keys have ndarray containing inputs and targets
 of 9 subjects separated by subject.
 '''
 lockbox = load('lockbox')['data']
-
-
 N = 50
 # To generate N sets of predictions for statistical analysis
 
@@ -33,16 +31,13 @@ subject_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 # Dropconnect best params were index 5: 0.1 with only conv_drop
 
 # For each iteration, store results dict into a 
-for iteration in range(N):
+for iteration in range(13, N):
     # For each method, get preds and labels for each test subject
     # and their corresponding lockbox set.
     predictions = {'mcdropout': 
                {'test': {'preds':[], 'labels':[]}, 
                 'lockbox':{'preds':[], 'labels':[]}},
                 'mcdropconnect': 
-               {'test': {'preds':[], 'labels':[]}, 
-                'lockbox':{'preds':[], 'labels':[]}},
-                'standard':
                {'test': {'preds':[], 'labels':[]}, 
                 'lockbox':{'preds':[], 'labels':[]}}
               }
@@ -76,9 +71,9 @@ for iteration in range(N):
             # Get Y_preds for test subject
             if method != 'standard':
                 model = StochasticClassifier(model)
-                Y_preds = model(X_test, num_samples=50)
+                Y_preds = model.predict_samples(X_test, num_samples=50)
                 # Get lockboxed Y_preds for test subject
-                lockbox_Y_preds = model.predict(X_lock, num_samples=50)
+                lockbox_Y_preds = model.predict_samples(X_lock, num_samples=50)
             else:
                 Y_preds = model(X_test, training=False)
                 # Get lockboxed Y_preds for test subject
@@ -93,7 +88,7 @@ for iteration in range(N):
     for method, values in predictions.items():
         values['test']['preds'] = np.array(values['test']['preds'])
         values['test']['labels'] = np.array(values['test']['labels'])
-        values['lockbox']['test'] = np.array(values['lockbox']['preds'])
+        values['lockbox']['preds'] = np.array(values['lockbox']['preds'])
         values['lockbox']['labels'] = np.array(values['lockbox']['labels'])
 
-    dict2hdf5(f'predictions/predictions_{iteration}_.h5', predictions)
+    dict2hdf5(f'predictions/predictions_{iteration}.h5', predictions)

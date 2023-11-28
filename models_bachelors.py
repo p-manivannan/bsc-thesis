@@ -1,3 +1,6 @@
+import sys, os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
 from tensorflow import keras
 import keras_tuner as kt
 import numpy as np
@@ -6,6 +9,7 @@ import keras.backend as K
 from keras.constraints import max_norm
 from keras_uncertainty.layers import DropConnectDense, StochasticDropout
 from keras_uncertainty.utils import numpy_entropy
+import dropconnect_tensorflow as dc
 
 # need these for ShallowConvNet
 def square(x):
@@ -14,11 +18,36 @@ def square(x):
 def log(x):
     return K.log(K.clip(x, min_value = 1e-7, max_value = 10000))   
 
-def shanon_entropy(probs):
-  return numpy_entropy(probs, axis=-1)
+def checkIfStandard(samples):
+  return len(samples.shape) == 3
 
+'''
+Mean of entropies of forward passes
+Input shape: (9, 50, 576, 4)
+Output shape: (9, 576)
+'''
+def shannon_entropy(samples):
+  if checkIfStandard(samples):
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
+  else:
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-3, arr=samples).mean(axis=-3)
+
+  return entropies.sum(axis=-1) * -1
+
+'''
+Entropies of means of forward 
+Input shape: (9, 50, 576, 4)
+'''
 def predictive_entropy(samples):
-  return -np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=samples).sum(axis=-1)
+  if checkIfStandard(samples):   # If standard model with no forward passes, then input shape is (9, 576, 4)
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
+    
+  else:
+    entropies = samples.mean(axis=-3)
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=entropies)
+
+  return entropies.sum(axis=-1) * -1
+  
 
 def mutual_information(samples):
   return predictive_entropy(samples) - shannon_entropy(samples)
@@ -26,10 +55,28 @@ def mutual_information(samples):
 def normalize_entropy(entropy, n_classes=4):
   return entropy / np.log2(n_classes)
 
-def predictive_uncertainty(samples):
-    entropy = predictive_entropy(samples)
-    norm = normalize_entropy(entropy)
-    return norm
+def normalize_information(info):
+  return info / np.max(info)
+
+def predictive_uncertainty(samples, key):
+  entropy = predictive_entropy(samples) if key == 'predictive-entropy' else shannon_entropy(samples)
+  norm = normalize_entropy(entropy)
+  return norm
+  
+# samples = np.array([[[0.1, 0.3, 0.5, 0.1], [0.7, 0.1, 0.1, 0.1]], 
+#                     [[0.03, 0.01, 0.8, 0.2], [0.4, 0.5, 0.05, 0.1]], 
+#                     [[0.3, 0.1, 0.5, 0.1], [0.3, 0.2, 0.06, 0.5]]
+#                     ])
+
+# print(f'inputs shape: (9, 576, 4)\nsamples shape: {samples.shape}')
+
+# pred_entropy = predictive_entropy(samples)
+# print(f'{pred_entropy.shape}')
+# shan_entropy = shannon_entropy(samples)
+# print(f'{shan_entropy.shape}')
+# mut_info = mutual_information(samples)
+# print(mut_info.shape)
+# print(f'{mut_info.shape}')
 
 
 def build_dropout_model(hp):
@@ -192,6 +239,56 @@ def build_standard_model(hp):
     model.compile(loss="categorical_crossentropy",
                   optimizer=optimizer, metrics=["accuracy"])
     return model
+
+def build_standard_model_dropconnect(hp):
+# KERNEL SIZE IS HOW LONG SEGMENT IS THAT YOU'RE LOOKING AT. 
+# NUMBER OF FILTERS IS HOW MANY OF THESE SEGMENTS YOU'RE LEARNING IT IS ARBITRARY
+    C = 22          # Number of electrodes
+    T = 1125        # Time samples of network input
+
+    f_1 = 40        # K is number of convolutional kernels.
+    k_1 = (1, 25)        # F is kernel size 
+
+    # One thats size of channels and another that's size of timestamps
+
+    f_2 = 40    # ITS SUPPOSED TO BE OTHER WAY AROUND. FILTER SIZE IS 
+    k_2 = (C, 1)     # KERNEL SIZE SHOULD ACTUALLY BE C 
+
+    f_p = (1, 75)   # Fp is pooling size
+    s_p = (1, 15)   # Sp is pool stride
+
+    Nc = 4          # Number of classes
+    drop_rates_1 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
+    drop_rates_2 = hp.Choice('drop_rates', [0.1, 0.2, 0.3, 0.4, 0.5])
+    conv_drop = hp.Boolean('conv_drop')
+    # Another dropout layer before FC layer
+    fc_drop = hp.Boolean('fc_drop')
+    # I APPARENTLY SWITCH AROUND THE ORDER OF F1 AND K1
+    # ADD THE AXIS PARAM FOR MAX NORM
+    model = keras.models.Sequential()
+    model.add(keras.layers.Conv2D(filters=f_1,  kernel_size=k_1, padding = 'SAME',
+                                activation="linear",
+                                input_shape = (C, T, 1),
+                                kernel_constraint = max_norm(2, axis=(0, 1, 2))))
+    model.add(keras.layers.Conv2D(filters=f_2,  kernel_size=k_2, padding = 'SAME',
+                                activation="linear",
+                                kernel_constraint = max_norm(2, axis=(0, 1, 2))))
+    if conv_drop:
+      model.add(dc.DropConnectDense(units=22, prob=drop_rates_1, activation="linear", use_bias=False))
+    model.add(keras.layers.BatchNormalization(momentum=0.9, epsilon=1e-05))
+    model.add(keras.layers.Activation(square))
+    model.add(keras.layers.AveragePooling2D(pool_size= f_p, strides= s_p))
+    model.add(keras.layers.Activation(log))
+    if fc_drop:
+      model.add(dc.DropConnectDense(units=22, prob=drop_rates_2, activation="linear", use_bias=False))
+    model.add(keras.layers.Flatten())
+    model.add(keras.layers.Dense(Nc, activation='softmax', kernel_constraint = max_norm(0.5)))
+
+    optimizer = keras.optimizers.Adam(learning_rate=1e-4)
+    model.compile(loss="categorical_crossentropy",
+                  optimizer=optimizer, metrics=["accuracy"])
+    return model
+
 
 '''
 Returns the best tuned models. 
