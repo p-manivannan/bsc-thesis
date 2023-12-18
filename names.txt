@@ -1,0 +1,11 @@
+METHODS:
+'mcdropout'
+'mcdropconnect'
+'standard'              -> standard dropout
+'standard_dropconnect'
+'ensemble_dropout'      -> Dropout as regulariser for ensemble
+
+
+DATASET
+'test'      -> out-of-population set
+'lockbox'   -> within-population set

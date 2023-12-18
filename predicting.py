@@ -31,7 +31,7 @@ subject_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 # Dropconnect best params were index 5: 0.1 with only conv_drop
 
 # For each iteration, store results dict into a 
-for iteration in range(13, N):
+for iteration in range(0, N):
     # For each method, get preds and labels for each test subject
     # and their corresponding lockbox set.
     predictions = {'mcdropout': 

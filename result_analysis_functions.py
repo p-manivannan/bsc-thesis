@@ -22,9 +22,11 @@ def get_corrects(Y_true, Y_pred, axis):
         Y_pred = np.mean(Y_true, axis=-3)       # averages forward passes if not already averaged
     return np.argmax(Y_true, axis=axis) == np.argmax(Y_pred, axis=axis)
 
-def load_predictions(n, isStandard):
-    if isStandard:
+def load_predictions(n, flag):
+    if flag == 'standard':
         return load_dict_from_hdf5(f'predictions/predictions_standard.h5')
+    elif flag == 'ensemble_dropout':
+        return load_dict_from_hdf5(f'predictions/predictions_ensemble_dropout.h5')
     else:
         return load_dict_from_hdf5(f'predictions/predictions_{n}.h5')
 
@@ -37,12 +39,15 @@ Get accuracies for each subject and ret as list
 '''
 def get_accuracies(data, isStandard):
     acc = []
+    print(f'data shape: {data["preds"].shape}')
     data = avg_forward_passes(data) if not isStandard else data
+    print(f'data shape: {data["preds"].shape}')
     y_preds = data["preds"].argmax(axis=-1)
     y_trues = data["labels"].argmax(axis=-1)
     
     # Get accuracy of each subject
     for idx, subject in enumerate(y_trues):
+        print(idx, subject.shape)
         score = accuracy_score(y_pred=subject, y_true=y_preds[idx], normalize=True)
         acc.append(score)
     
