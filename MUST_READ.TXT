@@ -1,0 +1,3 @@
+Flipout and DUQ were trained, tuned and tested on 200 epochs with early stopping at 10 epochs
+
+Ensembles, 

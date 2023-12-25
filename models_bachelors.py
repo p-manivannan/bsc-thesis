@@ -7,9 +7,8 @@ import numpy as np
 import math
 import keras.backend as K
 from keras.constraints import max_norm
-from keras_uncertainty.layers import DropConnectDense, StochasticDropout, RBFClassifier, FlipoutDense
+from keras_uncertainty.layers import DropConnectDense, StochasticDropout, RBFClassifier, FlipoutDense, FlipoutConv2D
 from keras_uncertainty.layers import duq_training_loop, add_gradient_penalty, add_l2_regularization
-from keras_uncertainty.utils import numpy_entropy
 import dropconnect_tensorflow as dc
 
 
@@ -278,19 +277,14 @@ def build_standard_model_dropconnect(hp):
                   optimizer=optimizer, metrics=["accuracy"])
     return model
 
-def build_flipout_model(hp, x_train):
-    num_batches = x_train.shape[0] / 32
+def build_flipout_model(hp, x_train_shape_0):
+    num_batches = x_train_shape_0 / 32
     kl_weight = 1.0 / num_batches
-    prior_sigma_1 = hp.Choice('prior_sigma_1', [1.0, 2.0, 3.0, 4.0, 5.0])
-    prior_sigma_2 = hp.Choice('prior_sigma_2', [1.0, 2.0, 3.0, 4.0, 5.0])
-    prior_pi = hp.Choice('prior_pi', [0.1, 0.2, 0.3, 0.4, 0.5])
-    # prior_params = {
-    #     'prior_sigma_1': 5.0, 
-    #     'prior_sigma_2': 2.0, 
-    #     'prior_pi': 0.5
-    # }
-# KERNEL SIZE IS HOW LONG SEGMENT IS THAT YOU'RE LOOKING AT. 
-# NUMBER OF FILTERS IS HOW MANY OF THESE SEGMENTS YOU'RE LEARNING IT IS ARBITRARY
+    prior_sigma_1 = hp.Choice('prior_sigma_1', [1.0, 2.5, 5.0])
+    prior_sigma_2 = hp.Choice('prior_sigma_2', [1.0, 2.5, 5.0])
+    prior_pi = hp.Choice('prior_pi', [0.1, 0.25, 0.5])
+    # KERNEL SIZE IS HOW LONG SEGMENT IS THAT YOU'RE LOOKING AT. 
+    # NUMBER OF FILTERS IS HOW MANY OF THESE SEGMENTS YOU'RE LEARNING IT IS ARBITRARY
     C = 22          # Number of electrodes
     T = 1125        # Time samples of network input
 
@@ -306,6 +300,9 @@ def build_flipout_model(hp, x_train):
     s_p = (1, 15)   # Sp is pool stride
 
     Nc = 4          # Number of classes
+    n_units_dense = hp.Choice('n_units_dense', [10, 25, 50])
+    n_units_2 = hp.Choice('n_units_2', [10, 25, 50])
+
     # I APPARENTLY SWITCH AROUND THE ORDER OF F1 AND K1
     # ADD THE AXIS PARAM FOR MAX NORM
     model = keras.models.Sequential()
@@ -323,6 +320,8 @@ def build_flipout_model(hp, x_train):
     # Log activation
     model.add(keras.layers.Activation(lambda x: K.log(K.clip(x, min_value = 1e-7, max_value = 10000)))) # lambda functions solve an error when trying to load weights for ensemble model
     model.add(keras.layers.Flatten())
+    model.add(keras.layers.Dense(n_units_dense, activation='relu', kernel_constraint = max_norm(0.5)))
+    model.add(FlipoutDense(n_units_2, kl_weight, prior_sigma_1=prior_sigma_1, prior_sigma_2=prior_sigma_2, prior_pi=prior_pi, bias_distribution=False, activation='relu'))
     model.add(FlipoutDense(Nc, kl_weight, prior_sigma_1=prior_sigma_1, prior_sigma_2=prior_sigma_2, prior_pi=prior_pi, bias_distribution=False, activation='softmax'))
     optimizer = keras.optimizers.Adam(learning_rate=1e-4)
     model.compile(loss="categorical_crossentropy",
@@ -347,6 +346,10 @@ def build_duq_model(hp):
     s_p = (1, 15)   # Sp is pool stride
 
     Nc = 4          # Number of classes
+    n_units = hp.Choice('dense_units', [100, 200, 300, 400, 500])
+    activ = hp.Choice('dense_activation', ['linear', 'relu'])
+    length_scale = hp.Choice('length_scale', [0.1, 0.2, 0.3, 0.4, 0.5])
+    train_centroids = hp.Choice('train_centroids', [False, True])
     model = keras.models.Sequential()
     model.add(keras.layers.Conv2D(filters=f_1,  kernel_size=k_1, padding = 'SAME',
                                 activation="linear",
@@ -365,11 +368,12 @@ def build_duq_model(hp):
     # LENGTH SCALE (0.1) IN THIS CASE IMPORTANT TO TUNE.
     # https://arxiv.org/pdf/2003.02037.pdf
     # Did a grid search (0, 1] while keeping lambda 0 and pick value with highest val acc.
-    length_scale = hp.Choice('length_scale', [0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-    model.add(RBFClassifier(Nc, length_scale, centroid_dims=Nc, trainable_centroids=True))
+    model.add(keras.layers.Dense(n_units, activation=activ, kernel_constraint = max_norm(0.5)))
+    model.add(RBFClassifier(Nc, length_scale, centroid_dims=n_units, trainable_centroids=train_centroids))
 
     optimizer = keras.optimizers.Adam(learning_rate=1e-4)
-    # binary cross entropy because lecture slides say so
+    # Tuned with binary cross entropy loss. Changed it to this because of a repo i saw:
+    # https://github.com/Skiracer33/duq/blob/main/duq.ipynb
     model.compile(loss="binary_crossentropy",
                   optimizer=optimizer, metrics=["categorical_accuracy"])
     
@@ -413,16 +417,17 @@ def load_tuned_duq():
                       objective='val_loss',
                       max_trials=200,
                       directory=f'duq/tuning',
-                      project_name=f'duq')
+                      project_name=f'duq_nunits_morethan_100')
   tuner.reload()
+  tuner.results_summary()
   return tuner.get_best_hyperparameters(num_trials=1)[0]
 
-def load_tuned_flipout():
-  tuner = kt.GridSearch(hypermodel=build_flipout_model,
+def load_tuned_flipout(x_train_shape_0):
+  tuner = kt.GridSearch(hypermodel=lambda x: build_flipout_model(x, x_train_shape_0),
                         objective='val_loss',
                         max_trials=200,
                         executions_per_trial=1,
                         directory=f'flipout/tuning',
-                        project_name=f'flipout_flipout_classification_layer')
+                        project_name=f'flipout_2')
   tuner.reload()
   return tuner.get_best_hyperparameters(num_trials=1)[0]
