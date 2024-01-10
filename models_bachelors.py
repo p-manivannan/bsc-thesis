@@ -9,6 +9,7 @@ import keras.backend as K
 from keras.constraints import max_norm
 from keras_uncertainty.layers import DropConnectDense, StochasticDropout, RBFClassifier, FlipoutDense, FlipoutConv2D
 from keras_uncertainty.layers import duq_training_loop, add_gradient_penalty, add_l2_regularization
+from keras_uncertainty.models import DeepEnsembleClassifier
 import dropconnect_tensorflow as dc
 
 
@@ -381,6 +382,9 @@ def build_duq_model(hp):
     add_l2_regularization(model)
     return model
 
+def build_ensemble_model():
+  dropout_best_hps, dropconnect_best_hps = load_tuned_models()
+  return DeepEnsembleClassifier(lambda: build_standard_model(dropout_best_hps), num_estimators=10) 
 
 '''
 Returns the best tuned models. 
@@ -419,7 +423,6 @@ def load_tuned_duq():
                       directory=f'duq/tuning',
                       project_name=f'duq_nunits_morethan_100')
   tuner.reload()
-  tuner.results_summary()
   return tuner.get_best_hyperparameters(num_trials=1)[0]
 
 def load_tuned_flipout(x_train_shape_0):
