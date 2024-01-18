@@ -20,50 +20,26 @@ def square(x):
 def log(x):
     return K.log(K.clip(x, min_value = 1e-7, max_value = 10000))   
 
-def checkIfStandard(samples):
-  return len(samples.shape) == 3
 
-'''
-Mean of entropies of forward passes
-Input shape: (9, 50, 576, 4)
-Output shape: (9, 576)
-'''
-def shannon_entropy(samples):
-  if checkIfStandard(samples):
-    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
-  else:
-    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-3, arr=samples).mean(axis=-3)
-
-  return entropies.sum(axis=-1) * -1
-
-'''
-Entropies of means of forward 
-Input shape: (9, 50, 576, 4)
-'''
-def predictive_entropy(samples):
-  if checkIfStandard(samples):   # If standard model with no forward passes, then input shape is (9, 576, 4)
-    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
-    
-  else:
-    entropies = samples.mean(axis=-3)
-    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=entropies)
-
-  return entropies.sum(axis=-1) * -1
-  
-
-def mutual_information(samples):
-  return predictive_entropy(samples) - shannon_entropy(samples)
-
-def normalize_entropy(entropy, n_classes=4):
-  return entropy / np.log2(n_classes)
-
-def normalize_information(info):
-  return info / np.max(info)
-
-def predictive_uncertainty(samples, key):
-  entropy = predictive_entropy(samples) if key == 'predictive-entropy' else shannon_entropy(samples)
-  norm = normalize_entropy(entropy)
-  return norm
+# x_train_shape param required for flipout
+# Function to create model depending on method
+def create_model(method, x_train_shape=None):
+    if method == 'flipout' and x_train_shape is not None:
+        return build_flipout_model(load_tuned_flipout(x_train_shape), x_train_shape)
+    elif method == 'duq':
+        return build_duq_model(load_tuned_duq())
+    elif 'dropout' in method or 'dropconnect' in method:
+        dropout_hp, dropconnect_hp = load_tuned_models()
+        if method == 'standard_dropout':
+            return build_standard_model(dropout_hp)
+        elif method == 'standard_dropconnect':
+            return build_standard_model_dropconnect(dropconnect_hp)
+        elif method == 'mcdropout':
+            return build_dropout_model(dropout_hp)
+        elif method == 'mcdropconnect':
+            return build_dropconnect_model(dropconnect_hp)
+        elif method == 'ensemble_dropout':
+            return build_ensemble_model()   
 
 
 def build_dropout_model(hp):

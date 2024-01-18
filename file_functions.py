@@ -57,6 +57,23 @@ def load_dict_from_hdf5(filename):
         return recursively_load_dict_contents_from_group(h5file, '/')
 
 
+# Returns weights directory for a method
+def get_weights_directory(method):
+    if method in ['standard', 'standard_dropout', 'mcdropout']:
+        return f'mcdropout/weights'
+    elif method in ['dropconnect', 'standard_dropconnect', 'mcdropconnect']:
+        return f'mcdropconnect/weights'
+    else:
+        return f'{method}/weights'
+    
+# checkpoint path is sometimes an hdf5 file in the case of ensembles and a ckpt file for mcdropout and the like.
+# this function corrects the weight path depending on the extension
+# duq, ensembles and flipout don't have .ckpt but mcdropout and mcdropconnect do
+def rectify_wts_path(method, wts_path):
+    if method in ['standard', 'standard_dropout', 'standard_dropconnect', 'mcdropout', 'mcdropconnect']:
+        return wts_path + '.ckpt'
+    else:
+        return wts_path
 
 def recursively_save_dict_contents_to_group( h5file, path, dic):
 

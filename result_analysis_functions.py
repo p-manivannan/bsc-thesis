@@ -1,3 +1,4 @@
+import glob
 from file_functions import *
 from models_bachelors import *
 import plotly.express as px
@@ -8,7 +9,79 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
-def get_uncertainty(y_pred, unc_method):
+'''
+Checks if an np array is a standard method solely based
+on its length.
+
+Returns: 0 for not Standard, 1 for Standard mehods and 2 for DUQ
+
+This is important because standard methods have different 
+y_pred sizes and therefore require special consideration.
+'''
+def checkIfStandard(samples):
+  return 1 if len(samples.shape) == 3 else 0
+
+'''
+Checks if a method is standard or not based on its method
+name. 
+
+Returns: 0 for not Standard, 1 for Standard mehods and 2 for DUQ
+
+This is important because standard methods have different 
+y_pred sizes and therefore require special consideration.
+'''
+def checkIfStandard(method):
+   if 'standard' in method:
+      return 1
+   elif 'duq' in method:
+      return 2
+   return 0 
+
+'''
+Mean of entropies of forward passes
+Input shape: (9, 50, 576, 4)
+Output shape: (9, 576)
+'''
+def shannon_entropy(samples):
+  if checkIfStandard(samples):
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
+  else:
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-3, arr=samples).mean(axis=-3)
+
+  return entropies.sum(axis=-1) * -1
+
+'''
+Entropies of means of forward 
+Input shape: (9, 50, 576, 4)
+'''
+def predictive_entropy(samples):
+  if checkIfStandard(samples):   # If standard model with no forward passes, then input shape is (9, 576, 4)
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
+    
+  else:
+    entropies = samples.mean(axis=-3)
+    entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=entropies)
+
+  return entropies.sum(axis=-1) * -1
+  
+
+def mutual_information(samples):
+  return predictive_entropy(samples) - shannon_entropy(samples)
+
+def normalize_entropy(entropy, n_classes=4):
+  return entropy / np.log2(n_classes)
+
+def normalize_information(info):
+  return info / np.max(info)
+
+def predictive_uncertainty(samples, key):
+  entropy = predictive_entropy(samples) if key == 'predictive-entropy' else shannon_entropy(samples)
+  norm = normalize_entropy(entropy)
+  return norm
+
+def get_uncertainty(y_pred, unc_method, isStandard=0):
+    if isStandard == 2:     # For DUQ
+       return y_pred.max(axis=-1)
     if unc_method == 'predictive-entropy':
         return predictive_uncertainty(y_pred, 'predictive-entropy')
     elif unc_method == 'mutual-information':
@@ -22,13 +95,42 @@ def get_corrects(Y_true, Y_pred, axis):
         Y_pred = np.mean(Y_true, axis=-3)       # averages forward passes if not already averaged
     return np.argmax(Y_true, axis=axis) == np.argmax(Y_pred, axis=axis)
 
-def load_predictions(n, flag):
-    if flag == 'standard':
+def load_predictions(method, num=None):
+    if 'standard' in method:        # Like standard_dropout/standard/standard_dropconnect
         return load_dict_from_hdf5(f'predictions/predictions_standard.h5')
-    elif flag == 'ensemble_dropout':
+    elif 'ensemble' in method:      # currently only ensemble based on regular dropout
         return load_dict_from_hdf5(f'predictions/predictions_ensemble_dropout.h5')
+    elif 'duq' in method:
+        return load_dict_from_hdf5(f'predictions/predictions_duq.h5')
+    elif 'flipout' in method:
+        return load_dict_from_hdf5(f'predictions/flipout/predictions_flipout_{num}.h5')
+    elif num != None:                           # Only cases are MC-Dropout and MC-DropConnect
+        if 'standard' in method:
+           return load_dict_from_hdf5(f'predictions/predictions_{num}.h5')
+        else:   # Only flipout satisfies this condition for now
+           return load_dict_from_hdf5(f'predictions/flipout/predictions_flipout_{num}.h5')
     else:
-        return load_dict_from_hdf5(f'predictions/predictions_{n}.h5')
+      num = np.max(glob.glob('\d+(?=\.)')) + 1   # Trying to get number of preds for mcdropout and mcdropconnect
+      ret = {method: {'test': {'preds':[], 'labels':[]}, 'lockbox': {'preds':[], 'labels':[]}}}
+      for n in range(num):
+          temp_holder = load_dict_from_hdf5(f'predictions/predictions_{n}.hdf5')
+          ret[method]['test']['preds'].append(temp_holder[method]['test']['preds'])
+          ret[method]['lockbox']['preds'].append(temp_holder[method]['lockbox']['preds'])
+          if n == 0:
+            ret[method]['test']['labels'].append(temp_holder[method]['test']['labels'])
+            ret[method]['lockbox']['labels'].append(temp_holder[method]['lockbox']['labels'])
+
+      ret[method]['test']['preds'] = np.array(ret[method]['test']['preds'])
+      ret[method]['lockbox']['preds'] = np.array(ret[method]['lockbox']['preds'])
+      return ret
+             
+
+          
+          
+
+       
+           
+    
 
 def avg_forward_passes(data):
     data["preds"] = data["preds"].mean(axis=-3)
@@ -51,7 +153,7 @@ def get_accuracies(data, isStandard):
         score = accuracy_score(y_pred=subject, y_true=y_preds[idx], normalize=True)
         acc.append(score)
     
-    return acc
+    return acc   
 
 ###########################################################################
 
