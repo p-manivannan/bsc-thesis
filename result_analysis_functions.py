@@ -42,9 +42,11 @@ Mean of entropies of forward passes
 Input shape: (9, 50, 576, 4)
 Output shape: (9, 576)
 '''
-def shannon_entropy(samples):
-  if checkIfStandard(samples):
+def shannon_entropy(samples, isStandard=0):
+  if isStandard == 1:
     entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
+  elif isStandard == 2:
+     return samples
   else:
     entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-3, arr=samples).mean(axis=-3)
 
@@ -54,10 +56,11 @@ def shannon_entropy(samples):
 Entropies of means of forward 
 Input shape: (9, 50, 576, 4)
 '''
-def predictive_entropy(samples):
-  if checkIfStandard(samples):   # If standard model with no forward passes, then input shape is (9, 576, 4)
+def predictive_entropy(samples, isStandard=0):
+  if isStandard == 1:  # If standard model with no forward passes, then input shape is (9, 576, 4)
     entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1,  arr=samples)
-    
+  elif isStandard == 2:
+     return samples
   else:
     entropies = samples.mean(axis=-3)
     entropies = np.apply_along_axis(func1d=lambda x: x*np.log2(x), axis=-1, arr=entropies)
@@ -65,29 +68,29 @@ def predictive_entropy(samples):
   return entropies.sum(axis=-1) * -1
   
 
-def mutual_information(samples):
-  return predictive_entropy(samples) - shannon_entropy(samples)
+def mutual_information(samples, isStandard):
+  return predictive_entropy(samples, isStandard) - shannon_entropy(samples, isStandard)
 
 def normalize_entropy(entropy, n_classes=4):
   return entropy / np.log2(n_classes)
 
 def normalize_information(info):
-  return info / np.max(info)
+  return info / np.max(info) if np.max(info) != 0 else info
 
-def predictive_uncertainty(samples, key):
-  entropy = predictive_entropy(samples) if key == 'predictive-entropy' else shannon_entropy(samples)
+def predictive_uncertainty(samples, key, isStandard=0):
+  entropy = predictive_entropy(samples, isStandard) if key == 'predictive-entropy' else shannon_entropy(samples, isStandard)
   norm = normalize_entropy(entropy)
   return norm
 
 def get_uncertainty(y_pred, unc_method, isStandard=0):
     if isStandard == 2:     # For DUQ
-       return y_pred.max(axis=-1)
+       return y_pred.min(axis=-1)
     if unc_method == 'predictive-entropy':
-        return predictive_uncertainty(y_pred, 'predictive-entropy')
+        return predictive_uncertainty(y_pred, 'predictive-entropy', isStandard)
     elif unc_method == 'mutual-information':
-        return normalize_information(mutual_information(y_pred))
+        return normalize_information(mutual_information(y_pred, isStandard))
     elif unc_method == 'shannon-entropy':
-        return predictive_uncertainty(y_pred, 'shannon-entropy')
+        return predictive_uncertainty(y_pred, 'shannon-entropy', isStandard)
 
 
 def get_corrects(Y_true, Y_pred, axis):
