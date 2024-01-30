@@ -1,0 +1,1154 @@
+{
+   "subject_1": {
+      "standard": {
+         "accuracy": {
+            "test": 0.5833333333333334,
+            "lockbox": 0.7149122807017544
+         },
+         "predictive-entropy": {
+            "test": 0.6992869543650794,
+            "lockbox": 0.8170717319490325
+         },
+         "shannon-entropy": {
+            "test": 0.6992869543650794,
+            "lockbox": 0.8170717319490325
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.5850694444444444,
+            "lockbox": 0.7149122807017544
+         },
+         "predictive-entropy": {
+            "test": 0.6954049389766956,
+            "lockbox": 0.8174610665408211
+         },
+         "shannon-entropy": {
+            "test": 0.6954856412102851,
+            "lockbox": 0.8174138744690892
+         },
+         "mutual-information": {
+            "test": 0.661075450380542,
+            "lockbox": 0.79454931571496
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.5659722222222222,
+            "lockbox": 0.6798245614035088
+         },
+         "predictive-entropy": {
+            "test": 0.6968527607361963,
+            "lockbox": 0.7861246133451171
+         },
+         "shannon-entropy": {
+            "test": 0.6968527607361963,
+            "lockbox": 0.7861246133451171
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.5590277777777778,
+            "lockbox": 0.7017543859649122
+         },
+         "predictive-entropy": {
+            "test": 0.6967586932068275,
+            "lockbox": 0.787890625
+         },
+         "shannon-entropy": {
+            "test": 0.6967586932068275,
+            "lockbox": 0.7877872242647059
+         },
+         "mutual-information": {
+            "test": 0.68672054580134,
+            "lockbox": 0.7576976102941178
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.5677083333333334,
+            "lockbox": 0.7192982456140351
+         },
+         "predictive-entropy": {
+            "test": 0.6735136263709273,
+            "lockbox": 0.7404130144817074
+         },
+         "shannon-entropy": {
+            "test": 0.6735197671419623,
+            "lockbox": 0.7402939214939025
+         },
+         "mutual-information": {
+            "test": 0.5997322623828648,
+            "lockbox": 0.6688262195121952
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.6145833333333334,
+            "lockbox": 0.7368421052631579
+         },
+         "predictive-entropy": {
+            "test": 0.6936618822212042,
+            "lockbox": 0.7965897817460317
+         },
+         "shannon-entropy": {
+            "test": 0.6920204102407491,
+            "lockbox": 0.7898685515873016
+         },
+         "mutual-information": {
+            "test": 0.660469791825724,
+            "lockbox": 0.7392361111111111
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.5538194444444444,
+            "lockbox": 0.7609649122807017
+         },
+         "predictive-entropy": {
+            "test": 0.6692241074369076,
+            "lockbox": 0.7064352378182587
+         },
+         "shannon-entropy": {
+            "test": 0.6692241074369076,
+            "lockbox": 0.7064352378182587
+         },
+         "mutual-information": {
+            "test": 0.6692241074369076,
+            "lockbox": 0.7064352378182587
+         }
+      }
+   },
+   "subject_2": {
+      "standard": {
+         "accuracy": {
+            "test": 0.4166666666666667,
+            "lockbox": 0.6951754385964912
+         },
+         "predictive-entropy": {
+            "test": 0.5990575396825397,
+            "lockbox": 0.776354310873068
+         },
+         "shannon-entropy": {
+            "test": 0.5990575396825397,
+            "lockbox": 0.776354310873068
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.4166666666666667,
+            "lockbox": 0.6973684210526315
+         },
+         "predictive-entropy": {
+            "test": 0.5996527777777778,
+            "lockbox": 0.7765928356576429
+         },
+         "shannon-entropy": {
+            "test": 0.5996155753968254,
+            "lockbox": 0.7766156230061071
+         },
+         "mutual-information": {
+            "test": 0.6103484623015873,
+            "lockbox": 0.7675576519916143
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.3923611111111111,
+            "lockbox": 0.6425438596491229
+         },
+         "predictive-entropy": {
+            "test": 0.6226353982300884,
+            "lockbox": 0.7492305115266233
+         },
+         "shannon-entropy": {
+            "test": 0.6226353982300884,
+            "lockbox": 0.7492305115266233
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.4097222222222222,
+            "lockbox": 0.6864035087719298
+         },
+         "predictive-entropy": {
+            "test": 0.6424663509471585,
+            "lockbox": 0.7278312741571529
+         },
+         "shannon-entropy": {
+            "test": 0.6426221335992023,
+            "lockbox": 0.7278201032194642
+         },
+         "mutual-information": {
+            "test": 0.590241774675972,
+            "lockbox": 0.7062490225429523
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.4253472222222222,
+            "lockbox": 0.7171052631578947
+         },
+         "predictive-entropy": {
+            "test": 0.6059436463407114,
+            "lockbox": 0.8142261100443307
+         },
+         "shannon-entropy": {
+            "test": 0.6059128182995253,
+            "lockbox": 0.8142735225090676
+         },
+         "mutual-information": {
+            "test": 0.6091867562735064,
+            "lockbox": 0.7482990778275609
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.4774305555555556,
+            "lockbox": 0.756578947368421
+         },
+         "predictive-entropy": {
+            "test": 0.5918816067653276,
+            "lockbox": 0.8008356182269225
+         },
+         "shannon-entropy": {
+            "test": 0.5839383871942011,
+            "lockbox": 0.8079253166209688
+         },
+         "mutual-information": {
+            "test": 0.5766475385080037,
+            "lockbox": 0.7163598380989685
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.4201388888888889,
+            "lockbox": 0.7368421052631579
+         },
+         "predictive-entropy": {
+            "test": 0.6022603553224131,
+            "lockbox": 0.7269097222222223
+         },
+         "shannon-entropy": {
+            "test": 0.6022603553224131,
+            "lockbox": 0.7269097222222223
+         },
+         "mutual-information": {
+            "test": 0.6022603553224131,
+            "lockbox": 0.7269097222222223
+         }
+      }
+   },
+   "subject_3": {
+      "standard": {
+         "accuracy": {
+            "test": 0.6892361111111112,
+            "lockbox": 0.6557017543859649
+         },
+         "predictive-entropy": {
+            "test": 0.755224237648284,
+            "lockbox": 0.7646613978654964
+         },
+         "shannon-entropy": {
+            "test": 0.755224237648284,
+            "lockbox": 0.7646613978654964
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.6892361111111112,
+            "lockbox": 0.6557017543859649
+         },
+         "predictive-entropy": {
+            "test": 0.7552664537100882,
+            "lockbox": 0.7645655369277634
+         },
+         "shannon-entropy": {
+            "test": 0.7553086697718925,
+            "lockbox": 0.7645122808512452
+         },
+         "mutual-information": {
+            "test": 0.7351645722809338,
+            "lockbox": 0.7509426325543743
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.7100694444444444,
+            "lockbox": 0.6842105263157895
+         },
+         "predictive-entropy": {
+            "test": 0.7283940676105002,
+            "lockbox": 0.7791132478632478
+         },
+         "shannon-entropy": {
+            "test": 0.7283940676105002,
+            "lockbox": 0.7791132478632478
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.7013888888888888,
+            "lockbox": 0.6885964912280702
+         },
+         "predictive-entropy": {
+            "test": 0.7520003453833756,
+            "lockbox": 0.7798622947878353
+         },
+         "shannon-entropy": {
+            "test": 0.7519931498963849,
+            "lockbox": 0.7797613707724051
+         },
+         "mutual-information": {
+            "test": 0.7480068501036151,
+            "lockbox": 0.7341100744594958
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.7204861111111112,
+            "lockbox": 0.6447368421052632
+         },
+         "predictive-entropy": {
+            "test": 0.791858115692584,
+            "lockbox": 0.7629755605946082
+         },
+         "shannon-entropy": {
+            "test": 0.7917159320511862,
+            "lockbox": 0.7627970941463005
+         },
+         "mutual-information": {
+            "test": 0.7326797874728728,
+            "lockbox": 0.7132383894436543
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.7517361111111112,
+            "lockbox": 0.706140350877193
+         },
+         "predictive-entropy": {
+            "test": 0.7775723122143446,
+            "lockbox": 0.7789121164364512
+         },
+         "shannon-entropy": {
+            "test": 0.7756012000230196,
+            "lockbox": 0.785957634189302
+         },
+         "mutual-information": {
+            "test": 0.710613866503012,
+            "lockbox": 0.6702628163530175
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.7170138888888888,
+            "lockbox": 0.6754385964912281
+         },
+         "predictive-entropy": {
+            "test": 0.7029887550320117,
+            "lockbox": 0.7412578975078975
+         },
+         "shannon-entropy": {
+            "test": 0.7029887550320117,
+            "lockbox": 0.7412578975078975
+         },
+         "mutual-information": {
+            "test": 0.7029887550320117,
+            "lockbox": 0.7412578975078975
+         }
+      }
+   },
+   "subject_4": {
+      "standard": {
+         "accuracy": {
+            "test": 0.5225694444444444,
+            "lockbox": 0.7236842105263158
+         },
+         "predictive-entropy": {
+            "test": 0.6242947749924493,
+            "lockbox": 0.7689153439153439
+         },
+         "shannon-entropy": {
+            "test": 0.6242947749924493,
+            "lockbox": 0.7689153439153439
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.5225694444444444,
+            "lockbox": 0.7236842105263158
+         },
+         "predictive-entropy": {
+            "test": 0.6245122319540924,
+            "lockbox": 0.7683261183261183
+         },
+         "shannon-entropy": {
+            "test": 0.6244880700694655,
+            "lockbox": 0.7682659932659933
+         },
+         "mutual-information": {
+            "test": 0.6180912111144669,
+            "lockbox": 0.730026455026455
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.4079861111111111,
+            "lockbox": 0.6776315789473685
+         },
+         "predictive-entropy": {
+            "test": 0.6227803082298621,
+            "lockbox": 0.7636109459965216
+         },
+         "shannon-entropy": {
+            "test": 0.6227803082298621,
+            "lockbox": 0.7636109459965216
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.453125,
+            "lockbox": 0.7105263157894737
+         },
+         "predictive-entropy": {
+            "test": 0.6240588700358816,
+            "lockbox": 0.7675715488215488
+         },
+         "shannon-entropy": {
+            "test": 0.6239554825761722,
+            "lockbox": 0.7676066217732884
+         },
+         "mutual-information": {
+            "test": 0.5973970686614365,
+            "lockbox": 0.7391273849607183
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.4652777777777778,
+            "lockbox": 0.6842105263157895
+         },
+         "predictive-entropy": {
+            "test": 0.6390409963171158,
+            "lockbox": 0.7671051460113959
+         },
+         "shannon-entropy": {
+            "test": 0.6391500290754022,
+            "lockbox": 0.7671830484330484
+         },
+         "mutual-information": {
+            "test": 0.5870868869936035,
+            "lockbox": 0.7007990562678063
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.5329861111111112,
+            "lockbox": 0.756578947368421
+         },
+         "predictive-entropy": {
+            "test": 0.6382851192133975,
+            "lockbox": 0.7634155895025461
+         },
+         "shannon-entropy": {
+            "test": 0.633562597629052,
+            "lockbox": 0.7629194411803107
+         },
+         "mutual-information": {
+            "test": 0.5884796115993108,
+            "lockbox": 0.684828306567437
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.4565972222222222,
+            "lockbox": 0.6842105263157895
+         },
+         "predictive-entropy": {
+            "test": 0.6426462906497892,
+            "lockbox": 0.7312255163817664
+         },
+         "shannon-entropy": {
+            "test": 0.6426462906497892,
+            "lockbox": 0.7312255163817664
+         },
+         "mutual-information": {
+            "test": 0.6426462906497892,
+            "lockbox": 0.7312255163817664
+         }
+      }
+   },
+   "subject_5": {
+      "standard": {
+         "accuracy": {
+            "test": 0.5086805555555556,
+            "lockbox": 0.706140350877193
+         },
+         "predictive-entropy": {
+            "test": 0.6872248821138702,
+            "lockbox": 0.7487716696022991
+         },
+         "shannon-entropy": {
+            "test": 0.6872248821138702,
+            "lockbox": 0.7487716696022991
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.5086805555555556,
+            "lockbox": 0.706140350877193
+         },
+         "predictive-entropy": {
+            "test": 0.6872731219623971,
+            "lockbox": 0.7487832576249189
+         },
+         "shannon-entropy": {
+            "test": 0.6872188521328043,
+            "lockbox": 0.7487484935570594
+         },
+         "mutual-information": {
+            "test": 0.7065931812974108,
+            "lockbox": 0.7149578195976639
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.3923611111111111,
+            "lockbox": 0.6469298245614035
+         },
+         "predictive-entropy": {
+            "test": 0.6836219974715549,
+            "lockbox": 0.7373723549847352
+         },
+         "shannon-entropy": {
+            "test": 0.6836219974715549,
+            "lockbox": 0.7373723549847352
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.4548611111111111,
+            "lockbox": 0.6666666666666666
+         },
+         "predictive-entropy": {
+            "test": 0.6800578596781252,
+            "lockbox": 0.7678324099722991
+         },
+         "shannon-entropy": {
+            "test": 0.6801064812563816,
+            "lockbox": 0.7677350242382271
+         },
+         "mutual-information": {
+            "test": 0.6746304760052511,
+            "lockbox": 0.7521424861495845
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.5173611111111112,
+            "lockbox": 0.6820175438596491
+         },
+         "predictive-entropy": {
+            "test": 0.6639406595528946,
+            "lockbox": 0.7420556602727576
+         },
+         "shannon-entropy": {
+            "test": 0.6639346241127904,
+            "lockbox": 0.7420667479764941
+         },
+         "mutual-information": {
+            "test": 0.6554910434068851,
+            "lockbox": 0.7215705116359291
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.5850694444444444,
+            "lockbox": 0.7127192982456141
+         },
+         "predictive-entropy": {
+            "test": 0.6565871646201408,
+            "lockbox": 0.7846741045214328
+         },
+         "shannon-entropy": {
+            "test": 0.6615472480538347,
+            "lockbox": 0.7810452143276572
+         },
+         "mutual-information": {
+            "test": 0.6097302062252463,
+            "lockbox": 0.7111802701115678
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.4913194444444444,
+            "lockbox": 0.6842105263157895
+         },
+         "predictive-entropy": {
+            "test": 0.6870560426440261,
+            "lockbox": 0.7392160790598291
+         },
+         "shannon-entropy": {
+            "test": 0.6870560426440261,
+            "lockbox": 0.7392160790598291
+         },
+         "mutual-information": {
+            "test": 0.6870560426440261,
+            "lockbox": 0.7392160790598291
+         }
+      }
+   },
+   "subject_6": {
+      "standard": {
+         "accuracy": {
+            "test": 0.4652777777777778,
+            "lockbox": 0.631578947368421
+         },
+         "predictive-entropy": {
+            "test": 0.631299670478775,
+            "lockbox": 0.7196593915343916
+         },
+         "shannon-entropy": {
+            "test": 0.631299670478775,
+            "lockbox": 0.7196593915343916
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.4652777777777778,
+            "lockbox": 0.631578947368421
+         },
+         "predictive-entropy": {
+            "test": 0.6314268753634426,
+            "lockbox": 0.7197110615079365
+         },
+         "shannon-entropy": {
+            "test": 0.6314026458616011,
+            "lockbox": 0.7196697255291005
+         },
+         "mutual-information": {
+            "test": 0.6175327950648214,
+            "lockbox": 0.7377025462962963
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.4774305555555556,
+            "lockbox": 0.6907894736842105
+         },
+         "predictive-entropy": {
+            "test": 0.6637088492902445,
+            "lockbox": 0.7019700551615445
+         },
+         "shannon-entropy": {
+            "test": 0.6637088492902445,
+            "lockbox": 0.7019700551615445
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.4965277777777778,
+            "lockbox": 0.6995614035087719
+         },
+         "predictive-entropy": {
+            "test": 0.6496322642874367,
+            "lockbox": 0.7102716060682333
+         },
+         "shannon-entropy": {
+            "test": 0.6496684350132627,
+            "lockbox": 0.7103173695169668
+         },
+         "mutual-information": {
+            "test": 0.6365806607185918,
+            "lockbox": 0.6995057547536783
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.46875,
+            "lockbox": 0.7346491228070176
+         },
+         "predictive-entropy": {
+            "test": 0.6611353183248607,
+            "lockbox": 0.7545331195263353
+         },
+         "shannon-entropy": {
+            "test": 0.661038489469862,
+            "lockbox": 0.7544591094116196
+         },
+         "mutual-information": {
+            "test": 0.6385439360929556,
+            "lockbox": 0.7256321697298631
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.4895833333333333,
+            "lockbox": 0.756578947368421
+         },
+         "predictive-entropy": {
+            "test": 0.6066423023109953,
+            "lockbox": 0.7122861992427211
+         },
+         "shannon-entropy": {
+            "test": 0.6059608240459304,
+            "lockbox": 0.7134743439091265
+         },
+         "mutual-information": {
+            "test": 0.6054180537463212,
+            "lockbox": 0.6783392087739913
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.4913194444444444,
+            "lockbox": 0.7236842105263158
+         },
+         "predictive-entropy": {
+            "test": 0.6204006319420157,
+            "lockbox": 0.6838744588744589
+         },
+         "shannon-entropy": {
+            "test": 0.6204006319420157,
+            "lockbox": 0.6838744588744589
+         },
+         "mutual-information": {
+            "test": 0.6204006319420157,
+            "lockbox": 0.6838744588744589
+         }
+      }
+   },
+   "subject_7": {
+      "standard": {
+         "accuracy": {
+            "test": 0.6197916666666666,
+            "lockbox": 0.6951754385964912
+         },
+         "predictive-entropy": {
+            "test": 0.7107683255950782,
+            "lockbox": 0.7360937748224133
+         },
+         "shannon-entropy": {
+            "test": 0.7107683255950782,
+            "lockbox": 0.7360937748224133
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.6197916666666666,
+            "lockbox": 0.6951754385964912
+         },
+         "predictive-entropy": {
+            "test": 0.7111712264814603,
+            "lockbox": 0.7356739214306788
+         },
+         "shannon-entropy": {
+            "test": 0.7111008787076474,
+            "lockbox": 0.7356512266527472
+         },
+         "mutual-information": {
+            "test": 0.6917488456569844,
+            "lockbox": 0.7242584481310851
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.5659722222222222,
+            "lockbox": 0.6271929824561403
+         },
+         "predictive-entropy": {
+            "test": 0.6552208588957056,
+            "lockbox": 0.7442307692307693
+         },
+         "shannon-entropy": {
+            "test": 0.6552208588957056,
+            "lockbox": 0.7442307692307693
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.6145833333333334,
+            "lockbox": 0.6798245614035088
+         },
+         "predictive-entropy": {
+            "test": 0.6996488013437167,
+            "lockbox": 0.7271100309323907
+         },
+         "shannon-entropy": {
+            "test": 0.6996042652822314,
+            "lockbox": 0.727076889085285
+         },
+         "mutual-information": {
+            "test": 0.6750012724588995,
+            "lockbox": 0.7172227132125498
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.5694444444444444,
+            "lockbox": 0.6951754385964912
+         },
+         "predictive-entropy": {
+            "test": 0.7009982297403619,
+            "lockbox": 0.7527971313800694
+         },
+         "shannon-entropy": {
+            "test": 0.7009552025963808,
+            "lockbox": 0.7527744366021378
+         },
+         "mutual-information": {
+            "test": 0.6764973446105428,
+            "lockbox": 0.6742278101808774
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.6163194444444444,
+            "lockbox": 0.6929824561403509
+         },
+         "predictive-entropy": {
+            "test": 0.720317379389459,
+            "lockbox": 0.7294755877034359
+         },
+         "shannon-entropy": {
+            "test": 0.7182461283538334,
+            "lockbox": 0.7170207956600362
+         },
+         "mutual-information": {
+            "test": 0.68302848766809,
+            "lockbox": 0.6966885171790234
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.6111111111111112,
+            "lockbox": 0.6666666666666666
+         },
+         "predictive-entropy": {
+            "test": 0.7161944500811688,
+            "lockbox": 0.7581804016620499
+         },
+         "shannon-entropy": {
+            "test": 0.7161944500811688,
+            "lockbox": 0.7581804016620499
+         },
+         "mutual-information": {
+            "test": 0.7161944500811688,
+            "lockbox": 0.7581804016620499
+         }
+      }
+   },
+   "subject_8": {
+      "standard": {
+         "accuracy": {
+            "test": 0.6006944444444444,
+            "lockbox": 0.6907894736842105
+         },
+         "predictive-entropy": {
+            "test": 0.6997046996732847,
+            "lockbox": 0.7867612293144208
+         },
+         "shannon-entropy": {
+            "test": 0.6997046996732847,
+            "lockbox": 0.7867612293144208
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.6006944444444444,
+            "lockbox": 0.6907894736842105
+         },
+         "predictive-entropy": {
+            "test": 0.6992963056044231,
+            "lockbox": 0.7864797928627715
+         },
+         "shannon-entropy": {
+            "test": 0.6992963056044231,
+            "lockbox": 0.7865023077789035
+         },
+         "mutual-information": {
+            "test": 0.6927934154310128,
+            "lockbox": 0.7828211189913317
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.6875,
+            "lockbox": 0.6929824561403509
+         },
+         "predictive-entropy": {
+            "test": 0.7704054433221099,
+            "lockbox": 0.7910036166365281
+         },
+         "shannon-entropy": {
+            "test": 0.7704054433221099,
+            "lockbox": 0.7910036166365281
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.6822916666666666,
+            "lockbox": 0.7127192982456141
+         },
+         "predictive-entropy": {
+            "test": 0.7660145441399353,
+            "lockbox": 0.8006928948913681
+         },
+         "shannon-entropy": {
+            "test": 0.7660562577343957,
+            "lockbox": 0.8005754550792719
+         },
+         "mutual-information": {
+            "test": 0.7480568417247181,
+            "lockbox": 0.790252495596007
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.6354166666666666,
+            "lockbox": 0.7017543859649122
+         },
+         "predictive-entropy": {
+            "test": 0.7252472027062191,
+            "lockbox": 0.7495634191176471
+         },
+         "shannon-entropy": {
+            "test": 0.7252667187093417,
+            "lockbox": 0.7497357536764706
+         },
+         "mutual-information": {
+            "test": 0.6718384074941453,
+            "lockbox": 0.7160386029411765
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.6649305555555556,
+            "lockbox": 0.7324561403508771
+         },
+         "predictive-entropy": {
+            "test": 0.695504538751877,
+            "lockbox": 0.7905664081672719
+         },
+         "shannon-entropy": {
+            "test": 0.6974255604107198,
+            "lockbox": 0.7803941297732404
+         },
+         "mutual-information": {
+            "test": 0.6721884765757112,
+            "lockbox": 0.7145994895454992
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.6440972222222222,
+            "lockbox": 0.7017543859649122
+         },
+         "predictive-entropy": {
+            "test": 0.6045296167247387,
+            "lockbox": 0.7677159926470588
+         },
+         "shannon-entropy": {
+            "test": 0.6045296167247387,
+            "lockbox": 0.7677159926470588
+         },
+         "mutual-information": {
+            "test": 0.6045296167247387,
+            "lockbox": 0.7677159926470588
+         }
+      }
+   },
+   "subject_9": {
+      "standard": {
+         "accuracy": {
+            "test": 0.5920138888888888,
+            "lockbox": 0.6951754385964912
+         },
+         "predictive-entropy": {
+            "test": 0.6642603107256505,
+            "lockbox": 0.72837755032567
+         },
+         "shannon-entropy": {
+            "test": 0.6642603107256505,
+            "lockbox": 0.72837755032567
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropout": {
+         "accuracy": {
+            "test": 0.5920138888888888,
+            "lockbox": 0.6951754385964912
+         },
+         "predictive-entropy": {
+            "test": 0.664659636862794,
+            "lockbox": 0.7282754238249778
+         },
+         "shannon-entropy": {
+            "test": 0.6646034816247581,
+            "lockbox": 0.7282867712139436
+         },
+         "mutual-information": {
+            "test": 0.6610033069195732,
+            "lockbox": 0.6785852075437442
+         }
+      },
+      "standard_dropconnect": {
+         "accuracy": {
+            "test": 0.6163194444444444,
+            "lockbox": 0.6578947368421053
+         },
+         "predictive-entropy": {
+            "test": 0.6966413867822319,
+            "lockbox": 0.7368696581196581
+         },
+         "shannon-entropy": {
+            "test": 0.6966413867822319,
+            "lockbox": 0.7368696581196581
+         },
+         "mutual-information": {
+            "test": [],
+            "lockbox": []
+         }
+      },
+      "mcdropconnect": {
+         "accuracy": {
+            "test": 0.5746527777777778,
+            "lockbox": 0.6885964912280702
+         },
+         "predictive-entropy": {
+            "test": 0.6526419631296627,
+            "lockbox": 0.7078249753296851
+         },
+         "shannon-entropy": {
+            "test": 0.6525494790061039,
+            "lockbox": 0.7078586166681619
+         },
+         "mutual-information": {
+            "test": 0.6572291756581787,
+            "lockbox": 0.7037319458150175
+         }
+      },
+      "flipout": {
+         "accuracy": {
+            "test": 0.5833333333333334,
+            "lockbox": 0.7236842105263158
+         },
+         "predictive-entropy": {
+            "test": 0.6367993551587302,
+            "lockbox": 0.7214766714766714
+         },
+         "shannon-entropy": {
+            "test": 0.6367559523809524,
+            "lockbox": 0.7213443963443963
+         },
+         "mutual-information": {
+            "test": 0.6295386904761905,
+            "lockbox": 0.6818181818181819
+         }
+      },
+      "ensemble_dropout": {
+         "accuracy": {
+            "test": 0.5815972222222222,
+            "lockbox": 0.7236842105263158
+         },
+         "predictive-entropy": {
+            "test": 0.6843995788691397,
+            "lockbox": 0.7656084656084656
+         },
+         "shannon-entropy": {
+            "test": 0.6877624326500279,
+            "lockbox": 0.7607984607984607
+         },
+         "mutual-information": {
+            "test": 0.6412646312008423,
+            "lockbox": 0.6903198653198653
+         }
+      },
+      "duq": {
+         "accuracy": {
+            "test": 0.6024305555555556,
+            "lockbox": 0.7083333333333334
+         },
+         "predictive-entropy": {
+            "test": 0.6315203302165788,
+            "lockbox": 0.7324425615121395
+         },
+         "shannon-entropy": {
+            "test": 0.6315203302165788,
+            "lockbox": 0.7324425615121395
+         },
+         "mutual-information": {
+            "test": 0.6315203302165788,
+            "lockbox": 0.7324425615121395
+         }
+      }
+   }
+}

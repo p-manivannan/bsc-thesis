@@ -1,13 +1,9 @@
-import glob
 from file_functions import *
 from models_bachelors import *
-import plotly.express as px
-import plotly.figure_factory as ff
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+import re
 
 '''
 Checks if an np array is a standard method solely based
@@ -84,7 +80,7 @@ def predictive_uncertainty(samples, key, isStandard=0):
 
 def get_uncertainty(y_pred, unc_method, isStandard=0):
     if isStandard == 2:     # For DUQ
-       return y_pred.min(axis=-1)
+       return y_pred.max(axis=-1)
     if unc_method == 'predictive-entropy':
         return predictive_uncertainty(y_pred, 'predictive-entropy', isStandard)
     elif unc_method == 'mutual-information':
@@ -105,23 +101,26 @@ def load_predictions(method, num=None):
         return load_dict_from_hdf5(f'predictions/predictions_ensemble_dropout.h5')
     elif 'duq' in method:
         return load_dict_from_hdf5(f'predictions/predictions_duq.h5')
-    elif 'flipout' in method:
-        return load_dict_from_hdf5(f'predictions/flipout/predictions_flipout_{num}.h5')
     elif num != None:                           # Only cases are MC-Dropout and MC-DropConnect
         if 'standard' in method:
            return load_dict_from_hdf5(f'predictions/predictions_{num}.h5')
         else:   # Only flipout satisfies this condition for now
            return load_dict_from_hdf5(f'predictions/flipout/predictions_flipout_{num}.h5')
     else:
-      num = np.max(glob.glob('\d+(?=\.)')) + 1   # Trying to get number of preds for mcdropout and mcdropconnect
+      reg = re.compile(r"\d+(?=\.)")
+      directory = f'predictions/predictions_' if 'flipout' not in method else f'predictions/flipout/predictions_flipout_'
+      if 'flipout' in method:
+        num = max([int(reg.search(x).group()) for x in os.listdir('predictions/flipout') if reg.search(x) != None]) + 1
+      else:
+        num = max([int(reg.search(x).group()) for x in os.listdir('predictions') if reg.search(x) != None]) + 1
       ret = {method: {'test': {'preds':[], 'labels':[]}, 'lockbox': {'preds':[], 'labels':[]}}}
       for n in range(num):
-          temp_holder = load_dict_from_hdf5(f'predictions/predictions_{n}.hdf5')
+          temp_holder = load_dict_from_hdf5(directory + f'{n}.h5')
           ret[method]['test']['preds'].append(temp_holder[method]['test']['preds'])
           ret[method]['lockbox']['preds'].append(temp_holder[method]['lockbox']['preds'])
           if n == 0:
-            ret[method]['test']['labels'].append(temp_holder[method]['test']['labels'])
-            ret[method]['lockbox']['labels'].append(temp_holder[method]['lockbox']['labels'])
+            ret[method]['test']['labels'] = temp_holder[method]['test']['labels']
+            ret[method]['lockbox']['labels'] =temp_holder[method]['lockbox']['labels']
 
       ret[method]['test']['preds'] = np.array(ret[method]['test']['preds'])
       ret[method]['lockbox']['preds'] = np.array(ret[method]['lockbox']['preds'])
@@ -140,19 +139,39 @@ def avg_forward_passes(data):
     return data
 
 '''
-Get accuracies for each subject and ret as list
+For this to work in the general case 
+(N_SUBJS, N_PRED_SETS, N_FORWARD_PASSES, N_TRIALS, N_CLASSES)
+where the items are in any order, maybe can store a file
+with this data that is created during pre-processing.
+Stores N_SUBJS, N_TRIALS, N_CLASSES initially, and 
+with each step of the pipeline, new info is added.
+
+This file is read in during function calls like these
 '''
-def get_accuracies(data, isStandard):
+def get_accuracies_helper(data):
+   preds = data['preds']
+   if len(preds.shape) < 3:
+      return None
+   elif len(preds.shape) == 3:   # 9, 576, 4. 
+      return data
+   elif len(preds.shape) == 4:   # 9, 50, 576, 4
+      return avg_forward_passes(data)
+   elif len(preds.shape) == 5:   # 50, 9, 50, 576, 4
+      data['preds'] = data['preds'].mean(axis=0)
+      return avg_forward_passes(data)
+      
+'''
+TO-DO: Need to refactor this to work for 
+9, 576, 4 or 9, 50, 576, 4 or 50, 9, 50, 576, 4
+'''
+def get_accuracies(data):
+    data = get_accuracies_helper(data)
     acc = []
-    print(f'data shape: {data["preds"].shape}')
-    data = avg_forward_passes(data) if not isStandard else data
-    print(f'data shape: {data["preds"].shape}')
     y_preds = data["preds"].argmax(axis=-1)
     y_trues = data["labels"].argmax(axis=-1)
     
     # Get accuracy of each subject
     for idx, subject in enumerate(y_trues):
-        print(idx, subject.shape)
         score = accuracy_score(y_pred=subject, y_true=y_preds[idx], normalize=True)
         acc.append(score)
     
