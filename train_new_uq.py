@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
 from models_bachelors import *
 from file_functions import *
+from result_analysis_functions import *
 import tensorflow as tf
 import keras_tuner as kt
 from keras_uncertainty.models import DeepEnsembleClassifier
@@ -17,7 +18,7 @@ from keras_uncertainty.models import DeepEnsembleClassifier
 '''
 Load best hyperparams
 '''
-dropout_best_hps, dropconnect_best_hps = load_tuned_models()
+# dropout_best_hps, dropconnect_best_hps = load_tuned_models()
 
 n_epochs= 200
 early_stopping = EarlyStopping(monitor='val_loss', patience=10)
@@ -26,7 +27,7 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 model = DeepEnsembleClassifier(lambda: build_standard_model(dropout_best_hps), num_estimators=10) for ensemble
 '''
 
-methods = ['duq']
+methods = ['duq', 'flipout']
 subject_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 '''
 Load data
@@ -36,7 +37,12 @@ lockbox = load('lockbox')['data']
 loaded_inputs = dataset['inputs']
 loaded_targets = dataset['targets']
 
-hp = load_tuned_duq()
+def load_hp(method):
+    if method == 'flipout':
+        return load_tuned_flipout()
+    else:
+        return load_tuned_duq()
+
 
 '''
 Training Loop
@@ -53,12 +59,8 @@ for method in methods:
         inputs = loaded_inputs[train_ids]           # Get train set inputs
         targets = loaded_targets[train_ids]         # Get train set targets
         inputs, targets = remove_lockbox(inputs, targets, test_subj_lockbox)    # Remove lockboxed set from train set
-        X_train, X_val, Y_train, Y_val = train_test_split(inputs, targets,test_size=0.1) 
-        if hp == None:         # Needed to load hyperparams for flipout
-            # hp = load_tuned_flipout(X_train.shape[0])
-            pass
-
-        model = build_duq_model(hp)
+        X_train, X_val, Y_train, Y_val = train_test_split(inputs, targets,test_size=0.1)
+        model = create_model(method)
         history = model.fit(X_train, Y_train, epochs=n_epochs, validation_data=[X_val, Y_val],
                         callbacks=[early_stopping])
         model.save_weights(f'{directory}/test_subj_{test_subject_id}')

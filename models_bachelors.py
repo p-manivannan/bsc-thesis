@@ -23,9 +23,9 @@ def log(x):
 
 # x_train_shape param required for flipout
 # Function to create model depending on method
-def create_model(method, x_train_shape=None):
-    if method == 'flipout' and x_train_shape is not None:
-        return build_flipout_model(load_tuned_flipout(x_train_shape), x_train_shape)
+def create_model(method):
+    if method == 'flipout':
+        return build_flipout_model(load_tuned_flipout())
     elif method == 'duq':
         return build_duq_model(load_tuned_duq())
     elif 'dropout' in method or 'dropconnect' in method:
@@ -254,7 +254,9 @@ def build_standard_model_dropconnect(hp):
                   optimizer=optimizer, metrics=["accuracy"])
     return model
 
-def build_flipout_model(hp, x_train_shape_0):
+def build_flipout_model(hp):
+    # Num batches is fixed during training from x_train_shape
+    x_train_shape_0 = 3736
     num_batches = x_train_shape_0 / 32
     kl_weight = 1.0 / num_batches
     prior_sigma_1 = hp.Choice('prior_sigma_1', [1.0, 2.5, 5.0])
@@ -323,8 +325,9 @@ def build_duq_model(hp):
     s_p = (1, 15)   # Sp is pool stride
 
     Nc = 4          # Number of classes
-    n_units = hp.Choice('dense_units', [100, 200, 300, 400, 500])
-    activ = hp.Choice('dense_activation', ['linear', 'relu'])
+    dense_units = hp.Choice('dense_units', [100, 200])
+    activ = hp.Choice('dense_activation', ['relu'])
+    centr_dims = hp.Choice('centroid_dims', [2, 5, 25, 100])
     length_scale = hp.Choice('length_scale', [0.1, 0.2, 0.3, 0.4, 0.5])
     train_centroids = hp.Choice('train_centroids', [False, True])
     model = keras.models.Sequential()
@@ -345,8 +348,8 @@ def build_duq_model(hp):
     # LENGTH SCALE (0.1) IN THIS CASE IMPORTANT TO TUNE.
     # https://arxiv.org/pdf/2003.02037.pdf
     # Did a grid search (0, 1] while keeping lambda 0 and pick value with highest val acc.
-    model.add(keras.layers.Dense(n_units, activation=activ, kernel_constraint = max_norm(0.5)))
-    model.add(RBFClassifier(Nc, length_scale, centroid_dims=n_units, trainable_centroids=train_centroids))
+    model.add(keras.layers.Dense(dense_units, activation=activ, kernel_constraint = max_norm(0.5)))
+    model.add(RBFClassifier(Nc, length_scale, centroid_dims=centr_dims, trainable_centroids=train_centroids))
 
     optimizer = keras.optimizers.Adam(learning_rate=1e-4)
     # Tuned with binary cross entropy loss. Changed it to this because of a repo i saw:
@@ -397,12 +400,12 @@ def load_tuned_duq():
                       objective='val_loss',
                       max_trials=200,
                       directory=f'duq/tuning',
-                      project_name=f'duq_nunits_morethan_100')
+                      project_name=f'9_february')
   tuner.reload()
   return tuner.get_best_hyperparameters(num_trials=1)[0]
 
-def load_tuned_flipout(x_train_shape_0):
-  tuner = kt.GridSearch(hypermodel=lambda x: build_flipout_model(x, x_train_shape_0),
+def load_tuned_flipout():
+  tuner = kt.GridSearch(hypermodel=build_flipout_model,
                         objective='val_loss',
                         max_trials=200,
                         executions_per_trial=1,

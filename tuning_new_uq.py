@@ -37,8 +37,8 @@ train_targets = loaded_targets[train_ids]   # Targets for training set
 train_inputs, train_targets = remove_lockbox(train_inputs, train_targets, lockbox_idxs)      # Remove lockbox data from train set
 X_train, X_val, Y_train, Y_val = train_test_split(train_inputs, train_targets, test_size=0.1)
 
-# methods = {'duq': build_duq_model}
-methods = {'flipout': lambda x: build_flipout_model(x, X_train.shape[0])}
+methods = {'duq': build_duq_model}
+# methods = {'flipout': lambda x: build_flipout_model(x, X_train.shape[0])}
 
 for method in methods:
     tuner = kt.GridSearch(hypermodel=methods[method],
@@ -47,7 +47,7 @@ for method in methods:
                           executions_per_trial=1,
                           overwrite=True,
                           directory=f'{method}/tuning',
-                          project_name=f'{method}_2')
+                          project_name=f'9_february')
     tuner.search(X_train, Y_train, epochs=n_epochs, validation_data=(X_val, Y_val),
                  callbacks=callbacks)
 

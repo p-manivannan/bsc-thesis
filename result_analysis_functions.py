@@ -100,15 +100,15 @@ def load_predictions(method, num=None):
     elif 'ensemble' in method:      # currently only ensemble based on regular dropout
         return load_dict_from_hdf5(f'predictions/predictions_ensemble_dropout.h5')
     elif 'duq' in method:
-        return load_dict_from_hdf5(f'predictions/predictions_duq.h5')
+        return load_dict_from_hdf5(f'predictions/predictions_duq_new.h5')
     elif num != None:                           # Only cases are MC-Dropout and MC-DropConnect
         if 'standard' in method:
            return load_dict_from_hdf5(f'predictions/predictions_{num}.h5')
         else:   # Only flipout satisfies this condition for now
-           return load_dict_from_hdf5(f'predictions/flipout/predictions_flipout_{num}.h5')
+           return load_dict_from_hdf5(f'predictions/flipout_new/predictions_flipout_{num}.h5')
     else:
       reg = re.compile(r"\d+(?=\.)")
-      directory = f'predictions/predictions_' if 'flipout' not in method else f'predictions/flipout/predictions_flipout_'
+      directory = f'predictions/predictions_' if 'flipout' not in method else f'predictions/flipout_new/predictions_'
       if 'flipout' in method:
         num = max([int(reg.search(x).group()) for x in os.listdir('predictions/flipout') if reg.search(x) != None]) + 1
       else:

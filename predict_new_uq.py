@@ -38,6 +38,7 @@ loaded_inputs = dataset['inputs']
 loaded_targets = dataset['targets']
 
 hp = load_tuned_duq()
+# hp = load_tuned_flipout()
 
 NUM = 1
 # For each iteration, store results dict into a 
@@ -90,12 +91,7 @@ for iteration in range(0, NUM):
             elif method == 'duq':
                 model = build_duq_model(hp)
             elif method == 'flipout':
-                hp_test = load_tuned_flipout(X_test.shape[0])
-                hp_lock = load_tuned_flipout(X_lock.shape[0])
-                model_test = build_flipout_model(hp_test, X_test.shape[0])
-                model_test.load_weights(wts_path).expect_partial()
-                model_lock = build_flipout_model(hp_lock, X_lock.shape[0])
-                model_lock.load_weights(wts_path).expect_partial()
+                model = build_flipout_model(hp) 
             else:
                 model = build_standard_model(dropout_best_hps)
             
@@ -107,11 +103,10 @@ for iteration in range(0, NUM):
                 # Get lockboxed Y_preds for test subject
                 lockbox_Y_preds = model.predict_samples(X_lock, num_samples=50)
             elif method == 'flipout':
-                model_test = StochasticClassifier(model_test)
-                model_lock = StochasticClassifier(model_lock)
-                Y_preds = model_lock.predict_samples(X_test, num_samples=50)
+                model = StochasticClassifier(model)
+                Y_preds = model.predict_samples(X_test, num_samples=50)
                 # Get lockboxed Y_preds for test subject
-                lockbox_Y_preds = model_test.predict_samples(X_lock, num_samples=50)
+                lockbox_Y_preds = model.predict_samples(X_lock, num_samples=50)
 
             else:
                 Y_preds = model.predict(X_test)
@@ -130,4 +125,4 @@ for iteration in range(0, NUM):
         values['lockbox']['preds'] = np.array(values['lockbox']['preds'])
         values['lockbox']['labels'] = np.array(values['lockbox']['labels'])
 
-    dict2hdf5(f'predictions/predictions_duq.h5', predictions)
+    dict2hdf5(f'predictions/predictions_duq_new.h5', predictions)
