@@ -7,45 +7,6 @@ def safe_open_w(path):
     '''
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return open(path, 'w')
-
-'''
-Expects a dictionary for second arg. Dictionary format:
-{'name': data, ....}
-'''
-def save(filename, dict):
-  file = h5py.File(filename + '.h5', 'w')
-  for name in dict:
-     file.create_dataset(name, data=dict[name])
-  file.close()
-
-
-def load(filename):
-  file = h5py.File(filename+'.h5', 'r')
-  dictionary = {}
-  for keys in file:
-    dictionary[keys] = file[keys][:]
-        
-  file.close()
-  return dictionary
-
-def dict2hdf5(filename, dic):
-    with h5py.File(filename, 'w') as h5file:
-        recursive_dict2hdf5(h5file, '/', dic)
-
-
-def recursive_dict2hdf5(h5file, path, dic):
-    for key, item in dic.items():
-        if not isinstance(key, str):
-            key = str(key)
-        if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes)):
-            h5file[path + key] = item
-        elif isinstance(item, list):
-            h5file[path + key] = np.array(item)
-        elif isinstance(item, dict):
-            recursive_dict2hdf5(h5file, path + key + '/',
-                                item)
-        else:
-            raise ValueError('Cannot save %s type' % type(item))
         
 def save_dict_to_hdf5(dic, filename):
     with h5py.File(filename, 'w') as h5file:
@@ -55,25 +16,6 @@ def load_dict_from_hdf5(filename):
 
     with h5py.File(filename, 'r') as h5file:
         return recursively_load_dict_contents_from_group(h5file, '/')
-
-
-# Returns weights directory for a method
-def get_weights_directory(method):
-    if method in ['standard', 'standard_dropout', 'mcdropout']:
-        return f'mcdropout/weights'
-    elif method in ['dropconnect', 'standard_dropconnect', 'mcdropconnect']:
-        return f'mcdropconnect/weights'
-    else:
-        return f'{method}/weights'
-    
-# checkpoint path is sometimes an hdf5 file in the case of ensembles and a ckpt file for mcdropout and the like.
-# this function corrects the weight path depending on the extension
-# duq, ensembles and flipout don't have .ckpt but mcdropout and mcdropconnect do
-def rectify_wts_path(method, wts_path):
-    if method in ['standard', 'standard_dropout', 'standard_dropconnect', 'mcdropout', 'mcdropconnect']:
-        return wts_path + '.ckpt'
-    else:
-        return wts_path
 
 def recursively_save_dict_contents_to_group( h5file, path, dic):
 
@@ -107,7 +49,7 @@ def recursively_save_dict_contents_to_group( h5file, path, dic):
             except:
                 item = np.array(item).astype('|S9')
                 h5file[path + key] = item
-            if not np.array_equal(h5file[path + key].value, item):
+            if not np.array_equal(h5file[path + key][()], item):
                 raise ValueError('The data representation in the HDF5 file does not match the original dict.')
         # save dictionaries
         elif isinstance(item, dict):
@@ -126,6 +68,25 @@ def recursively_load_dict_contents_from_group( h5file, path):
         elif isinstance(item, h5py._hl.group.Group):
             ans[key] = recursively_load_dict_contents_from_group(h5file, path + key + '/')
     return ans            
+
+
+# Returns weights directory for a method
+def get_weights_directory(method):
+    if method in ['standard', 'standard_dropout', 'mcdropout']:
+        return f'mcdropout/weights'
+    elif method in ['dropconnect', 'standard_dropconnect', 'mcdropconnect']:
+        return f'mcdropconnect/weights'
+    else:
+        return f'{method}/weights'
+    
+# checkpoint path is sometimes an hdf5 file in the case of ensembles and a ckpt file for mcdropout and the like.
+# this function corrects the weight path depending on the extension
+# duq, ensembles and flipout don't have .ckpt but mcdropout and mcdropconnect do
+def rectify_wts_path(method, wts_path):
+    if method in ['standard', 'standard_dropout', 'standard_dropconnect', 'mcdropout', 'mcdropconnect']:
+        return wts_path + '.ckpt'
+    else:
+        return wts_path
 
 # This function is used to to reshape np array shaped like
 # (num_subjects, num_trials, num_channels, num_timestamps)
