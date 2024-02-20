@@ -1,6 +1,6 @@
-from standardmodels import DropoutModel
-from keras.constraints import max_norm
+from .standardmodels import DropoutModel
 from keras_uncertainty.models import DeepEnsembleClassifier
+from keras.layers import Dropout
 
 class EnsembleModel(DropoutModel):
     def __init__(self, hp=None, C=22, T=1125, f=40,
@@ -13,12 +13,11 @@ class EnsembleModel(DropoutModel):
     # Ans: Maybe check if the tuned dropout exists. If not, tune for dropout and set
     #      hyperparams of ensemble to dropout
     #      That's up to the tuning file to decide. That logic doesn't belong here
-    
-    def get_model(self, hp=None):
-        if hp is not None:
-            return DeepEnsembleClassifier(lambda: self.build(hp), num_estimators=10) 
+
+    def get_model(self, num_estimators=10):
+        if self.hp is not None:
+            return DeepEnsembleClassifier(model_fn=lambda: self.build(self.hp), num_estimators=num_estimators) 
         else:
-            print('No hyperparameters provided! Either tune a standard model and retreive hyperparameters or specify a set of hyperparams (drop rates)')
-            return None
+            raise ValueError("hp is none in get_model()!")
 
 
